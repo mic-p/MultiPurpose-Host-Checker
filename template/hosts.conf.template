@@ -1,0 +1,39 @@
+[default]
+# The parameters set here are applied for all the hosts and are overwritten by specific host configuration
+# Every parameter can be used as default and every parameter, if present into host definition, will overwrite the default one
+
+# Check cannot be execute less than N m|h|d
+check_no_less_than = 3m
+
+# Default event handler for negative check response
+on_event = email_gmail
+
+# Default check is icmp. Only one check can be applied at a time
+check = icmp
+
+# If an event has occurred, execute a single command at the end.
+execute_cmd_overall = /usr/bin/true
+
+# section definition is used as hostname for apply the check, unless "load_host_details" parameters is set
+[www.google.com]
+# which check apply
+check = http_ok
+# which event do on negative response
+on_event = email_gmail
+check_no_less_than = 3h
+
+[microsoft]
+check = http_diff
+load_host_details = 1
+# does the host details
+on_event = execute_cmd
+execute_cmd = /usr/bin/true
+
+[8.8.8.8]
+check_icmp_count = 3
+on_event = smtp
+
+[local]
+check = fs_exists
+fs_exists = /tmp
+execute_cmd = /usr/bin/true

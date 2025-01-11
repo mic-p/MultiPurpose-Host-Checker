@@ -1,0 +1,35 @@
+[default]
+# default generic configuration section
+# debug can be 0|1 (no, yes, false, true)
+debug = 1
+
+# MPHC cache path for save data
+path_data = /tmp/mphc
+
+# do all the check also if a check return problem/error/not 0
+continue_on_check_problem = True
+
+
+[logger]
+# logger can be: syslog, file or 0|no|false|off (case insensitive)
+logger = syslog
+# syslog host, default localhost
+logger_syslog_host =
+# syslog port, default local 514
+logger_syslog_port =
+# if logger is file, specify the file where save logs
+logger_file = 
+
+[provider]
+# gmail part. we need only user and pwd
+gmail_user = 
+gmail_password =
+
+# smtp part. if empty, the connection will be plain
+smtp_host =
+smtp_port =
+smtp_use_tls =
+smtp_starttls =
+smtp_user =
+smtp_password =
+
