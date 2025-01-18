@@ -9,6 +9,18 @@ path_data = /tmp/mphc
 # do all the check also if a check return problem/error/not 0
 continue_on_check_problem = True
 
+# Execute commands. Possibile variables passed to cmd_to_execute
+# $c -> check name
+# $h -> host
+# $r -> return code from check
+# $f -> the path to the file that contains the information that the check returns to explain the error
+
+# If event occurred, execute a single command at the end. See eventhandler_cmd for variabe
+execute_cmd_event_end = /usr/bin/true
+
+# If program error occurred (check or eventhandler raise unknown expection), execute a single command 
+execute_cmd_error_end = /usr/bin/true
+
 
 [logger]
 # logger can be: syslog, file or 0|no|false|off (case insensitive)
@@ -20,11 +32,12 @@ logger_syslog_port =
 # if logger is file, specify the file where save logs
 logger_file = 
 
-[provider]
+[eventhandler_gmail]
 # gmail part. we need only user and pwd
 gmail_user = 
 gmail_password =
 
+[eventhandler_smtp]
 # smtp part. if empty, the connection will be plain
 smtp_host =
 smtp_port =
@@ -33,3 +46,6 @@ smtp_starttls =
 smtp_user =
 smtp_password =
 
+[eventhandler_executecmd]
+# cmd part. execute a cmd when event happends
+execute_cmd = /usr/bin/true $c $h $f

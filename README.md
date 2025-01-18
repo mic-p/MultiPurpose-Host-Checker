@@ -1,14 +1,16 @@
 # MultiPurpose-Host-Checker (MPHC)
-*MPHC* is a simple and multipurpose host checker and monitoring program that helps you to control the behavior of your hosts.  
+*MPHC* is a simple program for monitor and check your Hosts in a MultiPurpose manner.  
+*MPHC* helps you to control the behavior and the state of your hosts. It's up to you choose what and when *MPHC* will check your hosts.
 
-*MPHC* programs was developed with a simple rule in mind: users should take no more than four minutes to implement and use it.
+*MPHC* programs was developed with a simple rule in mind: users should take no more than 4 (four) minutes to implement and use it!
 
 ## Features
-- *MPHC* will monitor your hosts and notify you if anything changes or an event occurs
-- Simply configurable with .ini file
+- Check your hosts and notify you if anything changes or an event occurs.
+- Very simple configuration with .ini file
 - Works on Linux and Windows (and all the other platforms that runs Python)
+- Usable with cron (Linux) or Task Scheduler (Windows)
 - Extendible: do you know Python? You can write your checks and event handler following the templates included. In minutes without change the *MPHC* core code
-- Production ready. *MPHC* was used for month in production for monitor company hosts
+- Production ready. *MPHC* was used for month in production for monitor company and internet hosts
 
 ## Checks avaiables
 - icmp: check with *ping* program the reachability of a host
@@ -33,6 +35,7 @@
 - *MPHC* is just a software that checks your hosts with simplicity and alerts you
 
 ## Todo
-- Linux systemd service integration
+- Linux systemd integration
 - Linux .deb package
 - Office365 MFA email sender
+- Save events history into file / DB (Sqlite)

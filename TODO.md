@@ -1,5 +1,5 @@
 ## code bugs / errors
-- lst_startup_provider
+- 
 
 ## code todo
 - load defaults and specific that overwrite

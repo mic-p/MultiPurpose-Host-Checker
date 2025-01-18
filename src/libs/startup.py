@@ -41,7 +41,7 @@ class Startup(metaclass=Singleton):
         # at the end, check if all is ok
         self._startup_checks()
         
-        self._gc.log("Startup done! Start to check hosts")
+        #self._gc.log("Startup done! Start to check hosts")
         self._gc.log.debug("Startup done! Start to check hosts")
 
         self._gc.startup_done = True
@@ -49,12 +49,14 @@ class Startup(metaclass=Singleton):
     def _load_conf_ini_global(self):
         """"""
         #start to load the configuration from
-        config = configparser.ConfigParser()
+        config = configparser.ConfigParser(allow_no_value=True)
         config.read(self._startup_args.config)
 
         self._gc.conf_mphc.debug = config.getint("default",  "debug",  fallback=0)
         self._gc.conf_mphc.continue_on_check_problem = config.getboolean("default",  "continue_on_check_problem",  fallback=1)
         self._gc.conf_mphc.path_data = config.get("default",  "path_data",  fallback="")
+        self._gc.conf_mphc.execute_cmd_event_end = config.get("default", "execute_cmd_event_end",  fallback="")
+        self._gc.conf_mphc.execute_cmd_error_end = config.get("default", "execute_cmd_error_end",  fallback="")
         
         # load configuration for logger
         _logger = config.get("logger", "logger")
@@ -76,10 +78,11 @@ class Startup(metaclass=Singleton):
 
         # list of providers's configuration.
         # we create simply method for loading the .ini data with type and default values
-        lst_startup_provider = (
+        lst_data_gmail = (
                 ("gmail_user",      ("get", "")),
                 ("gmail_password",  ("get", "")),
-
+        )
+        lst_data_smtp = (
                 ("smtp_host",       ("get", "")),
                 ("smtp_port",       ("getint", 25)),
                 ("smtp_use_tls",    ("getboolean", False)),
@@ -87,19 +90,32 @@ class Startup(metaclass=Singleton):
                 ("smtp_password",   ("get", "")),
         )
 
-        for k, v in lst_startup_provider:
+        self._set_data_config(lst_data_smtp, "eventhandler_smtp", self._gc.conf_event_handler_smtp, config)
+        self._set_data_config(lst_data_gmail, "eventhandler_gmail", self._gc.conf_event_handler_gmail, config)
+        
+        
+
+        
+    def _set_data_config(self, lst_data, section, obj_toset, config):
+        """"""
+        for k, v in lst_data:
             fcall_str, fallback = v
             # load the function to load data (and type) from conf instance
             fcall = getattr(config, fcall_str)
-            # set to the configuration the data loaded
-            setattr(self._gc.conf_provider, k, fcall("logger", k, fallback=fallback))
-        
+            # set to the configuration the data loaded.
+            # here we use a workaround for a BUG of configparser that raise an exception when getint is called and the option is empty... argh!
+            if fcall_str in ("getint", "getboolean"):
+                fcall = getattr(config, "get")
+                setattr(obj_toset, k, fcall(section, k) or fallback)
+            else:
+                fcall = getattr(config, fcall_str)
+                setattr(obj_toset, k, fcall(section, k, fallback=fallback))
+            
     def _load_config_hosts(self):
         """"""
         config = configparser.ConfigParser()
         config.read(self._startup_args.hosts)
 
-        self._gc.conf_mphc.execute_cmd_overall = config.get("default", "execute_cmd_overall",  fallback="")
         
     
     def _startup_checks(self):

@@ -13,6 +13,7 @@ class Work():
         st.startup()
 
         self._gc = GlobalConfig()
+        
 
 
 if __name__ == '__main__':
