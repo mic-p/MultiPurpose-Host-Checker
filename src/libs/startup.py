@@ -8,6 +8,7 @@ from libs.config import GlobalConfig
 from libs.utils import  Singleton
 from libs.log import Logging
 
+from libs.objs import O_conf_event_handler_smtp, O_conf_event_handler_gmail, O_conf_event_handler_cmd
 
 class Startup(metaclass=Singleton):
     __doc__ = """"Startup function. Instance and call only the startup method"""
@@ -34,7 +35,6 @@ class Startup(metaclass=Singleton):
         
         # load configuration
         self._load_conf_ini_global()
-        self._load_config_hosts()
         
         self._gc.log = Logging()
         
@@ -75,55 +75,112 @@ class Startup(metaclass=Singleton):
             self._gc.conf_log.logger = ""
         else:
             self._gc.conf_log.logger = config.getboolean("logger", "logger")
+            
+        self._config = config
 
+    def _startup_checks(self):
+        """Do startup check after global configuration load"""
+
+        self._load_conf_ini_sections()
+        self._load_config_hosts()
+
+        if not  os.path.isdir(self._gc.conf_mphc.path_data):
+            self._raise_err_exit("Path %s set into configuration is not a valid directory" % self._gc.conf_mphc.path_data, 3)
+
+
+    def _load_conf_ini_sections(self):
+        """load secondary sections"""
         # list of providers's configuration.
         # we create simply method for loading the .ini data with type and default values
-        lst_data_gmail = (
-                ("gmail_user",      ("get", "")),
-                ("gmail_password",  ("get", "")),
-        )
-        lst_data_smtp = (
-                ("smtp_host",       ("get", "")),
-                ("smtp_port",       ("getint", 25)),
-                ("smtp_use_tls",    ("getboolean", False)),
-                ("smtp_user",       ("get", "")),
-                ("smtp_password",   ("get", "")),
-        )
+        for sec_name in self._config.sections():
+            if not sec_name.startswith("evth_"):
+                continue
+            type_ = self._config[sec_name].get("type")
+            if not type_ in ("smtp", "gmail", "cmd"):
+                raise ValueError("Value type %s of section %s not supported" % (type_,  sec_name))
+            
+            self._set_data_config(type_, sec_name)
 
-        self._set_data_config(lst_data_smtp, "eventhandler_smtp", self._gc.conf_event_handler_smtp, config)
-        self._set_data_config(lst_data_gmail, "eventhandler_gmail", self._gc.conf_event_handler_gmail, config)
-        
-        
-
-        
-    def _set_data_config(self, lst_data, section, obj_toset, config):
+    def _set_data_config(self, type_, section):
         """"""
-        for k, v in lst_data:
-            fcall_str, fallback = v
+        if type_ == "smtp":
+            Obj_event_handler = O_conf_event_handler_smtp()
+        elif type_ == "gmail":
+            Obj_event_handler = O_conf_event_handler_gmail()
+        elif type_ == "cmd":
+            Obj_event_handler = O_conf_event_handler_cmd()
+        else:
+            raise ValueError("why here??? there is a BUG!")
+    
+        self._gc.conf_event_handler[section] = Obj_event_handler
+        
+        data_mandatory, data_option = Obj_event_handler.get_data_mandatory(),  Obj_event_handler.get_data_optional()
+        
+        self._check_config_mandatory(section, data_mandatory)
+        self._check_config_options(section, (data_mandatory,  data_option), ("type", ))
+        
+        self._set_data_config_obj(section, data_mandatory, Obj_event_handler)
+        self._set_data_config_obj(section, data_option,  Obj_event_handler)
+    
+    def _check_config_mandatory(self, section, data):
+        """"""
+        # retrieve only the option names. see __data_mandatory and __data_optional from objs
+        opts_mandatory = [x[0] for x in data]
+        # retrieve all the options into the section
+        lst_options_present = self._config.options(section)
+        for opt_m in opts_mandatory:
+            if not opt_m in lst_options_present:
+                msg = "No mandatory option set %s to section %s" % (opt_m, section)
+                self._gc.log.error(msg)
+                raise ValueError(msg)
+                
+    def _check_config_options(self, section, data,  exclude_check=None):
+        """verify that option presents into the configuration are allowed"""
+        exclude_check = exclude_check if exclude_check else ()
+        opts_allowed = [x[0] for x in data[0]] + [x[0] for x in data[1]]
+        
+        for opt in self._config.options(section):
+            if opt in exclude_check:
+                continue
+            if not opt in opts_allowed:
+                msg = "Option %s presente but not allowed in section %s" % (opt, section)
+                self._gc.log.error(msg)
+                raise ValueError(msg)
+    
+    def _set_data_config_obj(self, section, data, obj_toset):
+        """internal function that set attributes to the object passed, starting from:
+            - config file instance
+            - section
+            - data to read from config file and to convert to the right type with default value if not present into the config file options
+            - obj where set data
+        """
+        for opt_name, v in data:
+            ftype, fallback = v
             # load the function to load data (and type) from conf instance
-            fcall = getattr(config, fcall_str)
+            if issubclass(ftype, int):
+                fcall_str = "getint"
+            elif issubclass(ftype, bool):
+                fcall_str = "getboolean"
+            elif issubclass(ftype, str):
+                fcall_str = "get"
+            else:
+                raise ValueError("Type %s not supported" % str(ftype))
+            
             # set to the configuration the data loaded.
             # here we use a workaround for a BUG of configparser that raise an exception when getint is called and the option is empty... argh!
-            if fcall_str in ("getint", "getboolean"):
-                fcall = getattr(config, "get")
-                setattr(obj_toset, k, fcall(section, k) or fallback)
+            if fcall_str in ("getint", "getboolean") and self._config.get(section, opt_name) == "":
+                    valuetoset = 0
             else:
-                fcall = getattr(config, fcall_str)
-                setattr(obj_toset, k, fcall(section, k, fallback=fallback))
+                fcall = getattr(self._config, fcall_str)
+                valuetoset = fcall(section, opt_name, fallback=fallback)
+            setattr(obj_toset, opt_name, valuetoset)
             
     def _load_config_hosts(self):
         """"""
         config = configparser.ConfigParser()
         config.read(self._startup_args.hosts)
+        
 
-        
-    
-    def _startup_checks(self):
-        """Do startup check after configuration load"""
-        
-        if not  os.path.isdir(self._gc.conf_mphc.path_data):
-            self._raise_err_exit("Path %s set into configuration is not a valid directory" % self._gc.conf_mphc.path_data, 3)
-        
     
     def _raise_err_parse(self, parser, msg=""):
         """"""

@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 from .utils import  Singleton
-from .objs import O_conf_log, O_conf_event_handler_smtp, O_conf_event_handler_gmail, O_conf_mphc
+from .objs import O_conf_log, O_conf_mphc
     
 class GlobalConfig(metaclass=Singleton):
     """Global container. Here we have:
@@ -11,8 +11,7 @@ class GlobalConfig(metaclass=Singleton):
     def __init__(self):
         """"""
         self.conf_log = O_conf_log()
-        self.conf_event_handler_smtp = O_conf_event_handler_smtp()
-        self.conf_event_handler_gmail = O_conf_event_handler_gmail()
+        self.conf_event_handler = dict()
         self.conf_mphc = O_conf_mphc()
         
         self.log = None

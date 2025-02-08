@@ -46,9 +46,11 @@ class Logging(metaclass=Singleton):
         self._log = logger
 
     def log(self, *args):
-        """"""
         self._write(*args)
-    
+    def error(self, *args):
+        self._write(*args, error=1)
+    def exception(self, *args):
+        self._write(*args, exception=1)
     def debug(self, *args):
         self._write(*args, debug=1)
 
@@ -64,6 +66,10 @@ class Logging(metaclass=Singleton):
         #print (v)
         if "debug" in kw:
             f_log = self._log.debug
+        elif "exception" in kw:
+            f_log = self._log.exception
+        elif "error" in kw:
+            f_log = self._log.error
         else:
             f_log = self._log.info
         f_log(v)
@@ -72,4 +78,4 @@ class Logging(metaclass=Singleton):
 
     def __call__(self, *args):
         """"""
-        self._write(*args)
+        self.log(*args)
