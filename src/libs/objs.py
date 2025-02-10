@@ -7,13 +7,10 @@ class O_conf_mphc(object):
     """"""
     def __init__(self):
         """Genral MPHC configuration"""
-        self.debug = False
         self.continue_on_check_problem = True
         self.execute_cmd_event_end = None
         self.execute_cmd_error_end = None
-        self.path_data = ""
         
-
 class O_conf_log(object):
     """Simple log configuration container"""
     def __init__(self):
@@ -26,7 +23,7 @@ class O_conf_log(object):
         return "<O_conf_log>logger: %s, logger_file: %s" % (self.logger, self.logger_file)
 
 
-class _BaseEventHandler(object):
+class _BaseObj(object):
     """Base class for event handler"""
     def get_data_mandatory(self):
         """"""
@@ -36,7 +33,7 @@ class _BaseEventHandler(object):
         """"""
         raise NotImplementedError
 
-class O_conf_event_handler_smtp(_BaseEventHandler):
+class O_conf_event_handler_smtp(_BaseObj):
     """Simple event configuration container for smtp configuration"""
     __data_mandatory = ()
     __data_optional =  (
@@ -66,7 +63,7 @@ class O_conf_event_handler_smtp(_BaseEventHandler):
     def __repr__(self):
         return "<O_conf_event_handler_smtp>smtp_host: %s, smtp_user: %s" % (self.smtp_host, self.smtp_user)
 
-class O_conf_event_handler_gmail(_BaseEventHandler):
+class O_conf_event_handler_gmail(_BaseObj):
     """Simple event configuration container for gmail configuration"""
     __data_mandatory = (("gmail_user",  (str, "")), ("gmail_password",  (str, "")))
     __data_optional = ()
@@ -88,7 +85,7 @@ class O_conf_event_handler_gmail(_BaseEventHandler):
     def __repr__(self):
         return "<O_conf_event_handler_gmail>gmail_user: %s" % (self.gmail_user, )
 
-class O_conf_event_handler_cmd(_BaseEventHandler):
+class O_conf_event_handler_cmd(_BaseObj):
     """Simple event configuration container for cmd configuration"""
     __data_mandatory = (("execute_cmd",  (str, "")), )
     __data_optional = ()
@@ -110,16 +107,50 @@ class O_conf_event_handler_cmd(_BaseEventHandler):
     def __repr__(self):
         return "<O_conf_event_handler_gmail>gmail_user: %s" % (self.gmail_user, )
 
-class O_conf_host(object):
+class O_conf_host_default(object):
+    """Default host configuration"""
+    __data_mandatory = ()
+    __data_optional = (
+                            ("check_no_less_than", (str, "")), 
+                            ("on_event", (str, "")), 
+                            ("check", (str, "")), 
+                        )
+    def __init__(self):
+        """"""
+        self.check_no_less_than = None
+        self.on_event = None
+        self.check = None
+        
+    def get_valid_values(self):
+        """retunr only the attributes that has a valid value"""
+        return [x[0] for x in self.__data_mandatory if x], [x[0] for x in self.__data_optional if x]
+
+class O_conf_host(_BaseObj):
     """Host configuration container"""
-    
+    __data_mandatory = (
+                            ("check", (str, "")), 
+                            ("on_event", (str, "")), 
+                        )
+    __data_optional = (
+                            ("check_no_less_than", (str, "")), 
+                            ("host_details_path", (str, "")), 
+                        )
     def __init__(self):
         """"""
         self.check = ""
         self.check_no_less_than = -1
         self.on_event = ""
-        self.load_host_details = ""
-        
+        self.host_details_path = ""
+        self.host_details = []
+
+    def get_data_mandatory(self):
+        """"""
+        return self.__data_mandatory
+    
+    def get_data_optional(self):
+        """"""
+        return self.__data_optional
+
     def __repr__(self):
         return "<O_conf_hosts>check: %s, on_event: %s" % (self.check, self.on_event)
 
@@ -131,3 +162,8 @@ class O_conf_host_detail(object):
         
     def __repr__(self):
         return "<O_conf_host_detail>lst_hosts: %s" % (self.lst_hosts, )
+
+class O_checks(dict):
+    """Class that cointein the checks"""
+        
+        

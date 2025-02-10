@@ -1,4 +1,4 @@
-[default]
+[DEFAULT]
 # The parameters set here are applied for all the hosts and are overwritten by specific host configuration
 # Every parameter can be used as default and every parameter, if present into host definition, will overwrite the default one
 
@@ -6,7 +6,7 @@
 check_no_less_than = 3m
 
 # Default event handler for negative check response
-on_event = gmail
+on_event = evth_smtp
 
 # Default check is icmp. Only one check can be applied at a time
 check = icmp
@@ -16,21 +16,27 @@ check = icmp
 # which check apply
 check = http_ok
 # which event do on negative response
-on_event = gmail
+on_event = evth_gmail
 check_no_less_than = 3h
 
 [microsoft]
 check = http_diff
 # specify the full path of the file where load the host details
-load_host_details = /tmp/mphc_microsoft.conf
+host_details_path = /tmp/mphc_microsoft.conf
 # on event inherit from default
-on_event = executecmd
+on_event = evth_cmd
 
 [8.8.8.8]
+# no check set, inherit from default
 check_icmp_count = 3
-on_event = smtp
+on_event = evth_smtp
 
 [local]
 check = fs_exists
-fs_exists = /tmp
-on_event = executecmd
+fs_path = /tmp
+on_event = evth_smtp
+
+[local_changes]
+check = fs_changes
+fs_path = /home/
+# no event presents, inherit from default

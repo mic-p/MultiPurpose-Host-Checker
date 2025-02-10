@@ -7,7 +7,7 @@ class Check_Icmp(object):
                             #("", (str, "")),  
                         )
     __data_optional = (
-                            ("check_icmp_count", (int, 4)), 
+                            ("fs_path", (int, 4)), 
                             #("", (str, "")), 
                         )
     def __init__(self):

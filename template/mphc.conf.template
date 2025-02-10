@@ -1,4 +1,4 @@
-[default]
+[global]
 # default generic configuration section
 # debug can be 0|1 (no, yes, false, true)
 debug = 1
@@ -21,8 +21,6 @@ execute_cmd_event_end = /usr/bin/true
 # If program error occurred (check or eventhandler raise unknown expection), execute a single command 
 execute_cmd_error_end = /usr/bin/true
 
-
-[logger]
 # logger can be: syslog, file or 0|no|false|off (case insensitive)
 logger = syslog
 # syslog host, default localhost

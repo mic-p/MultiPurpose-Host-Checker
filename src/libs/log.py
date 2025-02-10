@@ -21,7 +21,7 @@ class Logging(metaclass=Singleton):
         logger = logging.getLogger("MPHC")
         
         # set debug level has request by the conf
-        if self._gc.conf_mphc.debug:
+        if self.debug:
             ll = logging.DEBUG
         else:
             ll = logging.INFO
