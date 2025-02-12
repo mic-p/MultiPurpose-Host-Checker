@@ -9,17 +9,10 @@ from libs.utils import  Singleton
 from libs.log import Logging
 
 from libs.objs import O_conf_event_handler_smtp, O_conf_event_handler_gmail, O_conf_event_handler_cmd, O_conf_host
-from check_provider import fs_exists, fs_changes, http_diff, http_ok, icmp
 
 # to move to a better place and dynamic checks load
 LST_EVENT_HANDLER = ("smtp", "gmail", "cmd")
 
-# to move to a better place and dynamic checks load
-LST_CHECKS = {"fs_exists": fs_exists ,
-                        "fs_changes": fs_changes, 
-                        "http_diff": http_diff,
-                        "http_ok": http_ok,
-                        "icmp": icmp}
 
 class Startup(metaclass=Singleton):
     __doc__ = """"Startup function. Instance and call only the startup method"""
@@ -29,7 +22,7 @@ class Startup(metaclass=Singleton):
         self._startup_args = None
         self._gc = GlobalConfig()
 
-    def startup(self):
+    def DoStartupWork(self):
         """"
         Default startup method that do all the first-time-execute work:
             - load all the data into config
@@ -38,7 +31,7 @@ class Startup(metaclass=Singleton):
 
         # if we have been already called, skip
         if self._startup_called:
-            self._gc.log("Startup already called")
+            self._gc.error("Startup already called")
             return
         
         # argparse instances
@@ -51,14 +44,15 @@ class Startup(metaclass=Singleton):
         # load configuration
         self._load_conf_ini_global()
         
+        #startup loggin
         self._gc.log = Logging()
+        
+        # load available check for all the controls
+        self._available_checks = self._gc.checks_handler.get_check_available()
         
         # at the end, check if all is ok
         self._startup_checks()
         
-        #self._gc.log("Startup done! Start to check hosts")
-        self._gc.log.debug("Startup done! Start to check hosts")
-
         self._gc.startup_done = True
 
     def _load_conf_ini_global(self):
@@ -187,18 +181,22 @@ class Startup(metaclass=Singleton):
             
             # set to the configuration the data loaded.
             # here we use a workaround for a BUG of configparser that raise an exception when getint is called and the option is empty... argh!
-            if fcall_str in ("getint", "getboolean") and config.get(section, opt_name) == "":
-                    valuetoset = 0
+            if fcall_str in ("getint", "getboolean") and config.get(section, opt_name, fallback="") == "":
+                    if not fallback:
+                        valuetoset = 0
+                    else:
+                        valuetoset = fallback
             else:
                 fcall = getattr(config, fcall_str)
                 valuetoset = fcall(section, opt_name, fallback=fallback)
             setattr(obj_toset, opt_name, valuetoset)
             
     def _load_config_hosts(self):
-        """"""
+        """Load host configuration into the specific objects"""
         # load data from checks
-        for check_name in LST_CHECKS:
-            self._gc.checks[check_name] = LST_CHECKS[check_name].get_check_workers()
+        
+        for check_name in self._available_checks:
+            self._gc.checks[check_name] = self._gc.checks_handler.get_check_class(check_name).get_check_workers()
         
         # load configuration from files
         config = configparser.ConfigParser()
@@ -211,8 +209,9 @@ class Startup(metaclass=Singleton):
             self._set_host_data_config(sec_name)
 
     def _set_host_data_config(self, host_name):
-        """"""
+        """Load for every hostname the config, controlling the data that came from config"""
         obj_host = O_conf_host()
+        obj_host.name = host_name
         
         data_mandatory, data_option = obj_host.get_data_mandatory(),  obj_host.get_data_optional()
         
@@ -224,7 +223,7 @@ class Startup(metaclass=Singleton):
         
         # and verify if we can handle the "check" option present
         check_name = self._mphc_host_config[host_name].get("check")
-        if not check_name in LST_CHECKS:
+        if not check_name in self._available_checks:
             msg = "Check %s not available" % check_name
             self._gc.log.error(msg)
             raise ValueError(msg)
@@ -233,21 +232,25 @@ class Startup(metaclass=Singleton):
         data_mandatory_check = [x for x in data_mandatory] + [x for x in self._gc.checks[check_name]().get_data_mandatory()]
         data_option_check = [x for x in data_option] + [x for x in self._gc.checks[check_name]().get_data_optional()]
         
-        #verify the mandatory configuration
+        # verify the mandatory configuration
         self._check_config_mandatory(self._mphc_host_config, host_name, data_mandatory_check)
-        #and the optional one
+        # and the optional one
         self._check_config_options(self._mphc_host_config, host_name, (data_mandatory_check,  data_option_check))
         
-        # check if event exists
+        # check if requested event exists
         on_event_data = self._mphc_host_config[host_name].get("on_event")
         if not on_event_data in self._gc.conf_event_handler:
             msg = "Event handler %s not available" % on_event_data
             self._gc.log.error(msg)
             raise ValueError(msg)
         
+        # set the correct data
+        obj_host.on_event = on_event_data
+        obj_host.check = check_name
+        
         # set the data into the obj configuration
-        self._set_data_config_obj(self._mphc_host_config, host_name, data_mandatory, obj_host)
-        self._set_data_config_obj(self._mphc_host_config, host_name, data_option,  obj_host)
+        self._set_data_config_obj(self._mphc_host_config, host_name, data_mandatory_check, obj_host.specific_config)
+        self._set_data_config_obj(self._mphc_host_config, host_name, data_option_check,  obj_host.specific_config)
         
         self._gc.hosts_config[host_name] = obj_host
         

@@ -1,10 +1,12 @@
+# Version 1.0 blocking items
+
 ## code bugs / errors
 - 
 
 ## code todo
-- load defaults and specific that overwrite
-- all checks
-- all events
+- host_details_path
+- do checks except ICMP (not ended, need event hadler part)
+- do event handlers
 
 ## TODO list (sparse format)
 - End readme

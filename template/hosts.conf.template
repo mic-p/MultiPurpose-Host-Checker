@@ -11,6 +11,9 @@ on_event = evth_smtp
 # Default check is icmp. Only one check can be applied at a time
 check = icmp
 
+# Default priority
+priority = 1
+
 # section definition is used as hostname for apply the check, unless "load_host_details" parameters is set
 [www.google.com]
 # which check apply
@@ -28,8 +31,12 @@ on_event = evth_cmd
 
 [8.8.8.8]
 # no check set, inherit from default
-check_icmp_count = 3
+icmp_count = 3
 on_event = evth_smtp
+
+[amazon.com]
+check = dns_change
+record_type = MX
 
 [local]
 check = fs_exists

@@ -107,23 +107,9 @@ class O_conf_event_handler_cmd(_BaseObj):
     def __repr__(self):
         return "<O_conf_event_handler_gmail>gmail_user: %s" % (self.gmail_user, )
 
-class O_conf_host_default(object):
-    """Default host configuration"""
-    __data_mandatory = ()
-    __data_optional = (
-                            ("check_no_less_than", (str, "")), 
-                            ("on_event", (str, "")), 
-                            ("check", (str, "")), 
-                        )
-    def __init__(self):
-        """"""
-        self.check_no_less_than = None
-        self.on_event = None
-        self.check = None
-        
-    def get_valid_values(self):
-        """retunr only the attributes that has a valid value"""
-        return [x[0] for x in self.__data_mandatory if x], [x[0] for x in self.__data_optional if x]
+
+class O_conf_specific_host(object):
+    """"""
 
 class O_conf_host(_BaseObj):
     """Host configuration container"""
@@ -134,15 +120,18 @@ class O_conf_host(_BaseObj):
     __data_optional = (
                             ("check_no_less_than", (str, "")), 
                             ("host_details_path", (str, "")), 
+                            ("priority", (int, 0)), 
                         )
     def __init__(self):
         """"""
+        self.name = ""
         self.check = ""
-        self.check_no_less_than = -1
         self.on_event = ""
         self.host_details_path = ""
         self.host_details = []
-
+        
+        self.specific_config = O_conf_specific_host()
+        
     def get_data_mandatory(self):
         """"""
         return self.__data_mandatory
@@ -165,5 +154,8 @@ class O_conf_host_detail(object):
 
 class O_checks(dict):
     """Class that cointein the checks"""
+        
+class O_Hosts(dict):
+    """Class that cointein the hosts"""
         
         

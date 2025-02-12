@@ -38,4 +38,5 @@
 - Linux systemd integration
 - Linux .deb package
 - Office365 MFA email sender
+- Checks priority
 - Save events history into file / DB (Sqlite)
