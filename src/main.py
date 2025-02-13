@@ -21,9 +21,12 @@ class Work():
         checks = do_checks.DoChecks()
         checks.DoChecksWork()
         
-        self._gc.log.debug("Checks done! Start event hanndler")
+        self._gc.log.debug("Checks done! Start event handler")
         
-        do_events_handler.DoEventsHandler()
+        events = do_events_handler.DoEventsHandler()
+        events.DoEventWork()
+        
+        self._gc.log.debug("Event handler done! Goodbye, see you next time")
         
 
 

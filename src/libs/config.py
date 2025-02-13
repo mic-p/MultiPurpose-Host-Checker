@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 from .utils import  Singleton
-from .objs import O_conf_log, O_conf_mphc, O_checks, O_Hosts
+from .objs import O_conf_log, O_conf_mphc, O_checks, O_Hosts, O_checks_done, O_event_handlers
 
 class GlobalConfig(metaclass=Singleton):
     """Global container. Here we have:
@@ -17,13 +17,15 @@ class GlobalConfig(metaclass=Singleton):
         # checks list
         self.checks = O_checks()
         
-        # from .check_handlers import EventHandlers
-        from .check_handlers import EventHandlers
-        self.checks_handler = EventHandlers()
-        
+        # event handlers list
+        self.event_handles = O_event_handlers()
+
         #host configs
         self.hosts_config = O_Hosts()      
-
+        
+        # list of checks done after DoChecks.do_check class
+        self.checks_done = O_checks_done()
+        
         self.debug = False
         self.path_data = ""
 

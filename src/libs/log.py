@@ -9,7 +9,7 @@ from logging.handlers import RotatingFileHandler
 from .config import GlobalConfig
 
 LOG_FORMAT = '%(name)s: %(levelname)s %(message)s'
-#LOG_FORMAT = "%(asctime)s %(name)s %(message)s"
+LOG_FORMAT_DT = "%(asctime)s - %(name)s: %(levelname)s - %(message)s"
 
 class Logging(metaclass=Singleton):
     """"""
@@ -33,15 +33,17 @@ class Logging(metaclass=Singleton):
             else:    
                 address = (self._gc.conf_log.logger_syslog_host, self._gc.conf_log.logger_syslog_port)
             handler = logging.handlers.SysLogHandler(address = address)
+            formatter = logging.Formatter(LOG_FORMAT)
             
         elif self._gc.conf_log.logger == "file":
             # add a rotating handler
             handler = RotatingFileHandler(self._gc.conf_log.logger_file, maxBytes=1024 * 1024,
                 backupCount=3,
                 encoding='utf-8')
+            formatter = logging.Formatter(LOG_FORMAT_DT)
         logger.addHandler(handler)
         
-        handler.setFormatter(logging.Formatter(LOG_FORMAT))
+        handler.setFormatter(formatter)
 
         self._log = logger
 

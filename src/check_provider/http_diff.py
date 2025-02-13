@@ -2,7 +2,7 @@
 
 from libs.config import GlobalConfig
 from .base_check import BaseCheck
-
+from libs.objs import O_check_work
 
 class Check_HttpDiff(BaseCheck):
     """"""
@@ -17,11 +17,17 @@ class Check_HttpDiff(BaseCheck):
         """"""
         super(Check_HttpDiff).__init__()
 
+        # class that represent our work
+        self.check_work = O_check_work()
+        
+        self._host = None
         self._gc = GlobalConfig()
-
-    def do_check(self,  host):
+        
+    def do_check(self, host, address):
         """"""
+        self._address = address
         self._host = host
+        self.check_work.host = host
         self._gc.log.debug("Start Httpdiff check for: %s"% (host.name, ))
 
     def get_data_mandatory(self):

@@ -10,9 +10,8 @@ from libs.log import Logging
 
 from libs.objs import O_conf_event_handler_smtp, O_conf_event_handler_gmail, O_conf_event_handler_cmd, O_conf_host
 
-# to move to a better place and dynamic checks load
-LST_EVENT_HANDLER = ("smtp", "gmail", "cmd")
-
+import libs.check_handlers as check_handlers
+import libs.event_handlers as event_handlers
 
 class Startup(metaclass=Singleton):
     __doc__ = """"Startup function. Instance and call only the startup method"""
@@ -44,11 +43,22 @@ class Startup(metaclass=Singleton):
         # load configuration
         self._load_conf_ini_global()
         
-        #startup loggin
+        #startup logging
         self._gc.log = Logging()
         
+        # startup check handlers
+        self._checks_handler = check_handlers.CheckHandlers()
+        self._checks_handler.load_checks_handlers()
+        
+        # startup event handlers
+        self._event_handler = event_handlers.EventHandlers()
+        self._event_handler.load_event_handlers()
+
         # load available check for all the controls
-        self._available_checks = self._gc.checks_handler.get_check_available()
+        self._available_checks = check_handlers.get_check_available()
+        
+        # load available event handler for all the controls
+        self._available_event_handlers = event_handlers.get_event_available()
         
         # at the end, check if all is ok
         self._startup_checks()
@@ -108,7 +118,7 @@ class Startup(metaclass=Singleton):
                 continue
             # load type
             type_ = self._mphc_global_config[sec_name].get("type")
-            if not type_ in LST_EVENT_HANDLER:
+            if not type_ in self._available_event_handlers:
                 raise ValueError("Value type %s of section %s not supported" % (type_,  sec_name))
             
             self._set_mphc_global_data_config(type_, sec_name)
@@ -124,7 +134,11 @@ class Startup(metaclass=Singleton):
             Obj_event_handler = O_conf_event_handler_cmd()
         else:
             raise ValueError("why here??? there is a BUG!")
-    
+        
+        #retrieve the right module handler for specific type_
+        evt_handler_module = event_handlers.get_event_class(type_)
+        self._gc.event_handles[section] = evt_handler_module
+
         self._gc.conf_event_handler[section] = Obj_event_handler
         
         data_mandatory, data_option = Obj_event_handler.get_data_mandatory(),  Obj_event_handler.get_data_optional()
@@ -196,7 +210,7 @@ class Startup(metaclass=Singleton):
         # load data from checks
         
         for check_name in self._available_checks:
-            self._gc.checks[check_name] = self._gc.checks_handler.get_check_class(check_name).get_check_workers()
+            self._gc.checks[check_name] = check_handlers.get_check_class(check_name).get_check_workers()
         
         # load configuration from files
         config = configparser.ConfigParser()

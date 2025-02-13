@@ -2,6 +2,7 @@
 
 from libs.config import GlobalConfig
 from .base_check import BaseCheck
+from libs.objs import O_check_work
 
 import dns.resolver as D
 # https://gist.github.com/akshaybabloo/2a1df455e7643926739e934e910cbf2e
@@ -21,9 +22,18 @@ class Check_DnsChange(BaseCheck):
         
         self._gc = GlobalConfig()
 
-    def do_check(self,  host):
+        # class that represent our work
+        self.check_work = O_check_work()
+        
+        self._host = None
+        self._gc = GlobalConfig()
+        
+    def do_check(self, host, address):
         """"""
+        self._address = address
         self._host = host
+        self.check_work.host = host
+        
         self._gc.log.debug("Start DNS Change check for: %s"% (host.name, ))
 
         D.query

@@ -11,15 +11,18 @@ LST_CHECKS = {"fs_exists": fs_exists ,
                         "icmp": icmp, 
                         "dns_change": dns_change}
 
-class EventHandlers(object):
+class CheckHandlers(object):
     """"""
     def __init___(self):
         pass
+
+    def load_checks_handlers(self):
+        """Startup the event handlers. Future use for load external evts"""
+
+def get_check_class(check_name):
+    """"""
+    return LST_CHECKS[check_name]
     
-    def get_check_class(self, check_name):
-        """"""
-        return LST_CHECKS[check_name]
-    
-    def get_check_available(self):
-        """"""
-        return [x for x in LST_CHECKS]
+def get_check_available():
+    """"""
+    return [x for x in LST_CHECKS]

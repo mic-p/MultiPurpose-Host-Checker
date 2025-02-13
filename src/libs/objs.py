@@ -35,13 +35,18 @@ class _BaseObj(object):
 
 class O_conf_event_handler_smtp(_BaseObj):
     """Simple event configuration container for smtp configuration"""
-    __data_mandatory = ()
+    __data_mandatory = (
+                    ("type", (str, "")),
+                    ("address_from", (str, "")),
+                    ("address_to", (str, "")),
+                )
     __data_optional =  (
-                ("smtp_host", (str, "")),
-                ("smtp_port", (int, 25)),
-                ("smtp_use_tls", (bool, False)),
-                ("smtp_user", (str, "")),
-                ("smtp_password", (str, "")),
+                    ("smtp_host", (str, "")),
+                    ("smtp_port", (int, 25)),
+                    ("smtp_use_tls", (bool, False)),
+                    ("smtp_user", (str, "")),
+                    ("smtp_password", (str, "")),
+                    ("email_subject", (str, "MPHC - Event")),
                 )
     def __init__(self):
         super(O_conf_event_handler_smtp).__init__()
@@ -65,8 +70,16 @@ class O_conf_event_handler_smtp(_BaseObj):
 
 class O_conf_event_handler_gmail(_BaseObj):
     """Simple event configuration container for gmail configuration"""
-    __data_mandatory = (("gmail_user",  (str, "")), ("gmail_password",  (str, "")))
-    __data_optional = ()
+    __data_mandatory = (
+                    ("type", (str, "")),
+                    ("gmail_user",  (str, "")),
+                    ("gmail_password",  (str, "")), 
+                    ("email_from", (str, "")),
+                    ("email_to", (str, "")),
+                )
+    __data_optional = (
+                    ("email_subject", (str, "MPHC - Event")),
+        )
 
     def __init__(self):
         super(O_conf_event_handler_smtp).__init__()
@@ -87,7 +100,10 @@ class O_conf_event_handler_gmail(_BaseObj):
 
 class O_conf_event_handler_cmd(_BaseObj):
     """Simple event configuration container for cmd configuration"""
-    __data_mandatory = (("execute_cmd",  (str, "")), )
+    __data_mandatory = (
+                            ("type", (str, "")),
+                            ("execute_cmd",  (str, "")),
+                        )
     __data_optional = ()
 
     def __init__(self):
@@ -107,6 +123,31 @@ class O_conf_event_handler_cmd(_BaseObj):
     def __repr__(self):
         return "<O_conf_event_handler_gmail>gmail_user: %s" % (self.gmail_user, )
 
+class O_checks_done(object):
+    """class that represent the events to handle.
+    """
+    def __init__(self):
+        """"""
+        self._checks_done = []
+    
+    def add_check(self, check):
+        """"""
+        self._checks_done.append(check)
+    
+    def get_errors(self):
+        """"""
+        return [host for host in self._checks_done if host.check_work.error]
+
+class O_check_work():
+    """Object that represent a working check"""
+    def __init__(self):
+        """"""
+        # our working host instance O_conf_host
+        self.host = None
+        
+        # if != from 0, we have an error
+        self.error = 0
+        self.error_msg = ""
 
 class O_conf_specific_host(object):
     """"""
@@ -141,7 +182,7 @@ class O_conf_host(_BaseObj):
         return self.__data_optional
 
     def __repr__(self):
-        return "<O_conf_hosts>check: %s, on_event: %s" % (self.check, self.on_event)
+        return "<O_conf_host>check: %s, on_event: %s" % (self.check, self.on_event)
 
 class O_conf_host_detail(object):
     """Host configuration conteiner"""
@@ -153,8 +194,11 @@ class O_conf_host_detail(object):
         return "<O_conf_host_detail>lst_hosts: %s" % (self.lst_hosts, )
 
 class O_checks(dict):
-    """Class that cointein the checks"""
-        
+    """Class that contain the checks"""
+
+class O_event_handlers(dict):
+    """Class that contain the events"""
+
 class O_Hosts(dict):
     """Class that cointein the hosts"""
         
