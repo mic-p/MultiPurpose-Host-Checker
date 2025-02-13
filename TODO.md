@@ -10,7 +10,6 @@
 - mphc.conf: handle global options (continue_on_check_problem, execute_cmd_event_end, execute_cmd_error_end)
 - host.conf: handle check_no_less_than,
 - create subsystem for save and load informations from path_data
-	+ cdcds
 
 ## TODO list (sparse format)
 - End readme
