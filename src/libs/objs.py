@@ -72,10 +72,10 @@ class O_conf_event_handler_gmail(_BaseObj):
     """Simple event configuration container for gmail configuration"""
     __data_mandatory = (
                     ("type", (str, "")),
-                    ("gmail_user",  (str, "")),
-                    ("gmail_password",  (str, "")), 
                     ("email_from", (str, "")),
                     ("email_to", (str, "")),
+                    ("path_token", (str, "")),
+                    ("path_credentials", (str, "")),
                 )
     __data_optional = (
                     ("email_subject", (str, "MPHC - Event")),
@@ -201,5 +201,12 @@ class O_event_handlers(dict):
 
 class O_Hosts(dict):
     """Class that cointein the hosts"""
+
+class O_GlobalError(object):
+    """Object that represent an unexpected error of the code"""
+    def __init__(self, code_position, msg):
+        """"""
+        self.code_position = code_position
+        self.msg = msg
         
         

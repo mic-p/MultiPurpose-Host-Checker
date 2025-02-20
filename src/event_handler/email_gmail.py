@@ -2,140 +2,112 @@
 
 # gmail email and process for auth2.0
 # https://developers.google.com/gmail/api/quickstart/python
+# pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
 
-#from libs.config import GlobalConfig
+from libs.config import GlobalConfig
 
-
-import httplib2
 import os
-from oauth2client import client, tools, file
+
 import base64
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from apiclient import errors, discovery
-import mimetypes
-from email.mime.image import MIMEImage
-from email.mime.audio import MIMEAudio
-from email.mime.base import MIMEBase
+from email.message import EmailMessage
+
+from googleapiclient.discovery import build
+
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+
 
 SCOPES = 'https://www.googleapis.com/auth/gmail.send'
-CLIENT_SECRET_FILE = 'client_secret.json'
-APPLICATION_NAME = 'Gmail API Python Send Email'
+#SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
-def get_credentials():
-    home_dir = os.path.expanduser('~')
-    credential_dir = os.path.join(home_dir, '.credentials')
-    if not os.path.exists(credential_dir):
-        os.makedirs(credential_dir)
-    credential_path = os.path.join(credential_dir,
-                                   'gmail-python-email-send.json')
-    store = file.Storage(credential_path)
-    credentials = store.get()
-    if not credentials or credentials.invalid:
-        flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
-        flow.user_agent = APPLICATION_NAME
-        credentials = tools.run_flow(flow, store)
-        print('Storing credentials to ' + credential_path)
-    return credentials
+class EmailGmail(object):
+    """msg_text = "MPHC error reporting\n--\n%s" % host_work.check_work.error_msg
+        msg.set_content(msg_text)
+        msg['subject'] = smtp_config.email_subject
+        msg['to'] = smtp_config.address_to
+        msg['from'] = smtp_config.address_from
 
-def SendMessage(sender, to, subject, msgHtml, msgPlain, attachmentFile=None):
-    credentials = get_credentials()
-    http = credentials.authorize(httplib2.Http())
-    service = discovery.build('gmail', 'v1', http=http)
-    if attachmentFile:
-        message1 = createMessageWithAttachment(sender, to, subject, msgHtml, msgPlain, attachmentFile)
-    else: 
-        message1 = CreateMessageHtml(sender, to, subject, msgHtml, msgPlain)
-    result = SendMessageInternal(service, "me", message1)
-    return result
+        # send our email message 'msg' to our boss
+        smtp.sendmail(smtp_config.address_from,
+                      smtp_config.address_to,
+        """
 
-def SendMessageInternal(service, user_id, message):
-    try:
-        message = (service.users().messages().send(userId=user_id, body=message).execute())
-        print('Message Id: %s' % message['id'])
-        return message
-    except errors.HttpError as error:
-        print('An error occurred: %s' % error)
-        return "Error"
-    return "OK"
+    def __init__(self):
+        """"""
+        self._gc = GlobalConfig()
+        
+    def do_event(self, host_work):
+        """"""
+        self._host_work = host_work
+        event_name = host_work.check_work.host.on_event
+        self._gmail_config = self._gc.conf_event_handler[event_name]
+        self._gc.log.debug("Send email message via gmail: %s" % (event_name, ))
+        
+        self._cred = self._check_credentials()
+        self.SendMessage()
 
-def CreateMessageHtml(sender, to, subject, msgHtml, msgPlain):
-    msg = MIMEMultipart('alternative')
-    msg['Subject'] = subject
-    msg['From'] = sender
-    msg['To'] = to
-    msg.attach(MIMEText(msgPlain, 'plain'))
-    msg.attach(MIMEText(msgHtml, 'html'))
-    return {'raw': base64.urlsafe_b64encode(msg.as_bytes())}
+    def _check_credentials(self):
+        """ check and return credentials
+        https://developers.google.com/gmail/api/quickstart/python
+        """
+        path_credential = self._gmail_config.path_credentials
+        path_token = self._gmail_config.path_token
+        
+        if not (os.path.exists(path_credential) or os.path.exists(path_token)):
+            msg = "No such credential file exists or inaccessible: %s / %s\n. Exists!" % (path_credential, path_token)
+            raise FileNotFoundError(msg)
+        
+        # The file token.json stores the user's access and refresh tokens, and is
+        # created automatically when the authorization flow completes for the first
+        # time.
+        if os.path.exists(path_token):
+            creds = Credentials.from_authorized_user_file(path_token, SCOPES)
+            # If there are no (valid) credentials available, let the user log in.
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    path_credential, SCOPES
+                )
+            creds = flow.run_local_server(port=0)
+            # Save the credentials for the next run
+            with open(path_token, "w") as token:
+              token.write(creds.to_json())
+              
+        return creds
 
-def createMessageWithAttachment(
-    sender, to, subject, msgHtml, msgPlain, attachmentFile):
-    """Create a message for an email.
+    def SendMessage(self, attachmentFile=None):
+        """Create and send an email message
+            See: https://github.com/googleworkspace/python-samples/blob/main/gmail/snippet/send%20mail/send_message.py
+        """
+        sender = self._gmail_config.email_from
+        to = self._gmail_config.email_to
+        subject = self._gmail_config.email_subject
+        msg_text = "MPHC error reporting\n--\n%s" % self._host_work.check_work.error_msg
 
-    Args:
-      sender: Email address of the sender.
-      to: Email address of the receiver.
-      subject: The subject of the email message.
-      msgHtml: Html message to be sent
-      msgPlain: Alternative plain text message for older email clients          
-      attachmentFile: The path to the file to be attached.
+        
+        creds = self._cred
 
-    Returns:
-      An object containing a base64url encoded email object.
-    """
-    message = MIMEMultipart('mixed')
-    message['to'] = to
-    message['from'] = sender
-    message['subject'] = subject
+        service = build("gmail", "v1", credentials=creds)
+        message = EmailMessage()
 
-    messageA = MIMEMultipart('alternative')
-    messageR = MIMEMultipart('related')
+        message.set_content(msg_text)
 
-    messageR.attach(MIMEText(msgHtml, 'html'))
-    messageA.attach(MIMEText(msgPlain, 'plain'))
-    messageA.attach(messageR)
+        message["To"] = to
+        message["From"] = sender
+        message["Subject"] = subject
 
-    message.attach(messageA)
+        # encoded message
+        encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
 
-    print("create_message_with_attachment: file: %s" % attachmentFile)
-    content_type, encoding = mimetypes.guess_type(attachmentFile)
-
-    if content_type is None or encoding is not None:
-        content_type = 'application/octet-stream'
-    main_type, sub_type = content_type.split('/', 1)
-    if main_type == 'text':
-        fp = open(attachmentFile, 'rb')
-        msg = MIMEText(fp.read(), _subtype=sub_type)
-        fp.close()
-    elif main_type == 'image':
-        fp = open(attachmentFile, 'rb')
-        msg = MIMEImage(fp.read(), _subtype=sub_type)
-        fp.close()
-    elif main_type == 'audio':
-        fp = open(attachmentFile, 'rb')
-        msg = MIMEAudio(fp.read(), _subtype=sub_type)
-        fp.close()
-    else:
-        fp = open(attachmentFile, 'rb')
-        msg = MIMEBase(main_type, sub_type)
-        msg.set_payload(fp.read())
-        fp.close()
-    filename = os.path.basename(attachmentFile)
-    msg.add_header('Content-Disposition', 'attachment', filename=filename)
-    message.attach(msg)
-
-    return {'raw': base64.urlsafe_b64encode(message.as_string())}
+        create_message = {"raw": encoded_message}
+        # pylint: disable=E1101
+        service.users().messages().send(userId="me", body=create_message).execute()
+        
 
 
-def main():
-    to = "to@address.com"
-    sender = "from@address.com"
-    subject = "subject"
-    msgHtml = "Hi<br/>Html Email"
-    msgPlain = "Hi\nPlain Email"
-    SendMessage(sender, to, subject, msgHtml, msgPlain)
-    # Send message with attachment: 
-    SendMessage(sender, to, subject, msgHtml, msgPlain, '/path/to/file.pdf')
+def get_event_workers():
+    return EmailGmail
 
-if __name__ == '__main__':
-    main()

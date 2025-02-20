@@ -10,16 +10,16 @@ path_data = /tmp/mphc
 continue_on_check_problem = True
 
 # Execute commands. Possibile variables passed to cmd_to_execute
-# $c -> check name
-# $h -> host
+# $c -> check|event name
+# $h -> host (valid only for events, null otherwise)
 # $r -> return code from check
-# $f -> the path to the file that contains the information that the check returns to explain the error
+# $f -> random path to a file that contains the information that the check|event returns to explain the error. It's up to the program delete it
 
-# If event occurred, execute a single command at the end. See eventhandler_cmd for variabe
-execute_cmd_event_end = /usr/bin/true
+# If error on event occurred, execute a command at the end. See eventhandler_cmd for variabe
+execute_cmd_event_error = echo $c $h $r $f > /tmp/mphc-execute_err.txt
 
-# If program error occurred (check or eventhandler raise unknown expection), execute a single command 
-execute_cmd_error_end = /usr/bin/true
+# If program error occurred (check or eventhandler raise unknown expection), execute a single command at the end of the work
+execute_cmd_global_error = /usr/bin/true $c $h $r $f
 
 # logger can be: syslog, file or 0|no|false|off (case insensitive)
 logger = syslog
@@ -38,7 +38,7 @@ gmail_password =
 # email address used for send email into event handler
 email_from = email@email.tld
 email_to = email@email.tld
-
+credentials_path = ~/.google/gmail_cred.json
 
 [evth_smtp]
 type = smtp

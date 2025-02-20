@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
-from libs.config import GlobalConfig
+import sys
 
-from libs import startup, do_checks, do_events_handler
+from libs.config import GlobalConfig
+from libs import startup, do_checks, do_events_handler, do_end_work
 
 
 class Work():
@@ -26,7 +27,22 @@ class Work():
         events = do_events_handler.DoEventsHandler()
         events.DoEventWork()
         
-        self._gc.log.debug("Event handler done! Goodbye, see you next time")
+        self._gc.log.debug("Events done! Start check for errors")
+        
+        end_work = do_end_work.DoEndWork()
+        errors_presents = end_work.DoEndWork()
+        
+        if errors_presents:
+            msg_exit = "Some errors presents, exit 1"
+            err_exit = 1
+        else:
+            msg_exit = "That's all, goodbye. See you next time!"
+            err_exit = 0
+        
+        self._gc.log.debug(msg_exit)
+        sys.exit(err_exit)
+        
+        
         
 
 

@@ -105,7 +105,7 @@ class Check_Icmp(BaseCheck):
                 msg = "Error on ICMP: %s" % err
             self.check_work.error_msg = msg
             self.check_work.error = 1
-            self._gc.log( self.check_work.error_msg)
+            self._gc.log(self.check_work.error_msg)
         
     def get_data_mandatory(self):
         """"""

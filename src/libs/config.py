@@ -14,6 +14,10 @@ class GlobalConfig(metaclass=Singleton):
         self.conf_event_handler = dict()
         self.conf_mphc = O_conf_mphc()
         
+        # commands to execute on some events error. see @doc for more info
+        self.execute_cmd_event_error = ""
+        self.execute_cmd_global_error = ""
+        
         # checks list
         self.checks = O_checks()
         
@@ -25,6 +29,9 @@ class GlobalConfig(metaclass=Singleton):
         
         # list of checks done after DoChecks.do_check class
         self.checks_done = O_checks_done()
+        
+        # container for global errors
+        self.global_errors = []
         
         self.debug = False
         self.path_data = ""

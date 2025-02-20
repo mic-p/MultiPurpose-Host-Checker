@@ -4,7 +4,7 @@ from check_provider import fs_exists, fs_changes, http_diff, http_ok, icmp,  dns
 
 
 # to move to a better place and dynamic checks load
-LST_CHECKS = {"fs_exists": fs_exists ,
+LST_CHECKS = {"fs_exists": fs_exists,
                         "fs_changes": fs_changes, 
                         "http_diff": http_diff,
                         "http_ok": http_ok,

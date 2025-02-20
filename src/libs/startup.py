@@ -75,8 +75,8 @@ class Startup(metaclass=Singleton):
         self._gc.debug = config.getint("global",  "debug",  fallback=0)
         self._gc.conf_mphc.continue_on_check_problem = config.getboolean("global",  "continue_on_check_problem",  fallback=1)
         self._gc.path_data = config.get("global",  "path_data",  fallback="")
-        self._gc.conf_mphc.execute_cmd_event_end = config.get("global", "execute_cmd_event_end",  fallback="")
-        self._gc.conf_mphc.execute_cmd_error_end = config.get("global", "execute_cmd_error_end",  fallback="")
+        self._gc.conf_mphc.execute_cmd_event_error = config.get("global", "execute_cmd_event_error",  fallback="")
+        self._gc.conf_mphc.execute_cmd_global_error = config.get("global", "execute_cmd_global_error",  fallback="")
         
         # load configuration for logger, so the code can use it
         _logger = config.get("global", "logger")

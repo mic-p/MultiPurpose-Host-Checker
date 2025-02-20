@@ -13,10 +13,12 @@ class EmailSmtp(object):
         """"""
         self._gc = GlobalConfig()
         
-    def do_event(self, smtp_config, host_work):
+    def do_event(self, host_work):
         """"""
+        event_name = host_work.check_work.host.on_event
+        smtp_config = self._gc.conf_event_handler[event_name]
         
-        self._gc.log.debug("Send email message via: %s, to: %s" % (smtp_config.smtp_host, smtp_config.address_to))
+        self._gc.log.debug("Send smtp email  via: %s, %s, to: %s" % (event_name,  smtp_config.smtp_host, smtp_config.address_to))
         
         # initialize connection to our email server
         smtp = smtplib.SMTP(smtp_config.smtp_host, port=smtp_config.smtp_port)

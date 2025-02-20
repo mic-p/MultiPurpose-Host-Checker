@@ -3,6 +3,7 @@
 import traceback
 
 from libs.config import GlobalConfig
+from libs.objs import O_GlobalError
 
 class DoEventsHandler(object):
     """"""
@@ -22,18 +23,21 @@ class DoEventsHandler(object):
             event_name = host_work.check_work.host.on_event
             
             # retrieve the corresponding module for on_event
-            event_handler_config = self._gc.conf_event_handler[event_name]
             evth_module = self._gc.event_handles[event_name]
             event_class = evth_module.get_event_workers()()
             
             try:
-                event_class.do_event(event_handler_config, host_work)
+                event_class.do_event(host_work)
             except Exception as exc_obj:
                 # if there is an error doing the check, trace it has disaster and try to trace the exception
-                #tb_str = ''.join(traceback.format_exception(exc_obj))
-                tb_str = ''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__))
-                msg = "Disaster on check: %s\n" % event_name
-                msg += tb_str
-                self._gc.log.error(msg)
+                tb = traceback.format_exception(exc_obj)
+
+                #tb_str = ''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__))
+                #msg = "Disaster on check: %s\n" % event_name
+                #msg += tb_str
+                #self._gc.log.error(msg)
+                
+                err = O_GlobalError("DoEventsHandler::%s" % event_name, tb)
+                self._gc.global_errors.append(err)
         
             
