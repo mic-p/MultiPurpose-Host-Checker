@@ -9,6 +9,14 @@ class BaseCheck(object):
         if type(self).__bases__[0] is object:
             raise NotImplementedError
                 
+    def format_changes(self):
+        """"""
+        return ""
+    
+    def handle_changes(self):
+        """"""
+        return False
+    
     def get_data_mandatory(self):
         """"""
         raise NotImplementedError

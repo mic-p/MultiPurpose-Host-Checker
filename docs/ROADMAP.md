@@ -2,17 +2,21 @@
 ## Todo for v.1 (q2 2025)
 - End wiki
 - End checks:
-	+ http_diff
-	+ http_ok
-	+ fs_exists
-	+ fs_changes
-	+ dns_change
+	- dns_change -> Done
+	- http_ok -> Done (see to-do for evolutions and more infos)
+	- http_diff
+	- fs_exists
+	- fs_changes
+
+- New Checks:
+	- restic backup verification
+
 - Enable multiple checks and multiple events handler
 - Enable multiple records for dns_change
 
 ## Todo for v.2 (not planned)
 - New checks:
-	+ Execute an external command and check the returncode. Example: verify the *MPHC* error logs and send email with the logs file has attachment
+	- Execute an external command and check the returncode. Example: verify the *MPHC* error logs and send email with the logs file has attachment
 
 ```
 grep ERROR /var/log/mphc.log > /tmp/mphc_error.logs

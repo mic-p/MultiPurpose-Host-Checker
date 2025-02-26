@@ -1,12 +1,12 @@
 # -*- coding: UTF-8 -*-
 
 from .utils import  Singleton
-from .objs import O_conf_log, O_conf_mphc, O_checks, O_Hosts, O_checks_done, O_event_handlers
+from .objs import O_conf_log, O_conf_mphc, O_checks, O_Hosts, O_checks_done, O_event_handlers, O_LocalConfig
 
 class GlobalConfig(metaclass=Singleton):
     """Global container. Here we have:
         - configurations objects
-        - useful functions osed overall
+        - useful functions used overall
     """
     def __init__(self):
         """"""
@@ -30,11 +30,11 @@ class GlobalConfig(metaclass=Singleton):
         # list of checks done after DoChecks.do_check class
         self.checks_done = O_checks_done()
         
-        # container for global errors
-        self.global_errors = []
-        
         self.debug = False
+        
+        # path where save data and obj that cache into FS the informations
         self.path_data = ""
+        self.local_config = O_LocalConfig()
 
         self.log = None
         self.startup_done = False

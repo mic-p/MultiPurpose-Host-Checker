@@ -1,7 +1,7 @@
 # SEND EMAIL WITH GMAIL
 
 ## Introduction
-Bad news: Gmail (Google) phaseout basic authentication from its services from 2021, forcing user to adopt more secure authentication mechanism like OAuth2
+Bad news: Gmail (Google) phaseout basic authentication (user+pwd) from its services from 2021, forcing user to adopt more secure authentication mechanism like OAuth2
 
 ## MPHC and Gmail
 Good news: *MPHC* full supports Gmail OAuth2!

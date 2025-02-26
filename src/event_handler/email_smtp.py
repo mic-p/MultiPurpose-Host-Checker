@@ -6,8 +6,9 @@ from email.message import EmailMessage
 import email.utils as utils
 
 from libs.config import GlobalConfig
+import libs.constants as C
 
-class EmailSmtp(object):
+class Evt_EmailSmtp(object):
     """"""
     def __init__(self):
         """"""
@@ -38,7 +39,17 @@ class EmailSmtp(object):
         msg['message-id'] = utils.make_msgid(domain=domain)
         
         # assemble text message
-        msg_text = "MPHC error reporting\n--\n%s" % host_work.check_work.error_msg
+        if host_work.check_work.report == C.CHECK_ERROR:
+            msg_text = "MPHC error\n--\n%s"
+        elif host_work.check_work.report == C.CHECK_MSG:
+            msg_text = "MPHC information reporting\n--\n%s"
+        elif host_work.check_work.report == C.CHECK_DISASTER:
+            msg_text = "MPHC disaster\n--\n%s"
+        else:
+            raise ValueError("Why here? %s" % host_work.check_work.report)
+        
+        msg_text = msg_text % host_work.check_work.report_msg.msg
+        
         msg.set_content(msg_text)
         msg['subject'] = smtp_config.email_subject
         msg['to'] = smtp_config.address_to
@@ -54,4 +65,4 @@ class EmailSmtp(object):
 
 
 def get_event_workers():
-    return EmailSmtp
+    return Evt_EmailSmtp

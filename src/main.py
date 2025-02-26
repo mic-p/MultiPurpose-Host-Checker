@@ -6,6 +6,7 @@ import sys
 from libs.config import GlobalConfig
 from libs import startup, do_checks, do_events_handler, do_end_work
 
+import libs.constants as C
 
 class Work():
     def __init__(self):
@@ -30,9 +31,9 @@ class Work():
         self._gc.log.debug("Events done! Start check for errors")
         
         end_work = do_end_work.DoEndWork()
-        errors_presents = end_work.DoEndWork()
+        ret_code = end_work.DoEndWork()
         
-        if errors_presents:
+        if ret_code == C.CHECK_ERROR:
             msg_exit = "Some errors presents, exit 1"
             err_exit = 1
         else:

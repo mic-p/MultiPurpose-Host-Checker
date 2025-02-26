@@ -8,11 +8,12 @@ sudo sysctl -p
 
 """
 
-import subprocess
 import sys, os
 
 from libs.config import GlobalConfig
 from libs.objs import O_check_work
+from libs.utils_popen import ExecuteCmd
+
 from .base_check import BaseCheck
 
 try:
@@ -57,9 +58,10 @@ class Check_Icmp(BaseCheck):
         self._gc.log.debug("Start ICMP check for: %s"% (host.name, ))
         
         if HAVE_ICMPLIB:
-            self._do_icmp_pythonic()
+            return self._do_icmp_pythonic()
         else:
-            self._do_icmp_os()
+            return self._do_icmp_os()
+            
     
     def _do_icmp_pythonic(self):
         """"""
@@ -85,27 +87,10 @@ class Check_Icmp(BaseCheck):
         ping_cmd = [str(x).strip() for x in ping_cmd]
 
         cmd_exe = ping_cmd +[self._address]
-        self._gc.log.debug("Start from ICMP check command: %s"% (cmd_exe, ))
+        self._gc.log.debug("Start ICMP check: %s"% (self._address, ))
         
-        timeout = 0
         timeout_max = self._host.specific_config.interval * self._host.specific_config.timeout + 5
-        try:
-            p = subprocess.Popen(cmd_exe, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            out, err = p.communicate(timeout=timeout_max)
-        except subprocess.TimeoutExpired:
-            timeout = 1
-        except Exception as err:
-            err = (f"Unexpected {err=}, {type(err)=}")
-            
-        self._gc.log.debug("ICMP check exit code: %s"% (p.returncode, ))
-        if p.returncode or timeout:
-            if timeout:
-                msg = "Timeout on ICMP: %s"
-            else:
-                msg = "Error on ICMP: %s" % err
-            self.check_work.error_msg = msg
-            self.check_work.error = 1
-            self._gc.log(self.check_work.error_msg)
+        return ExecuteCmd().do_execute(cmd_exe, timeout_max)
         
     def get_data_mandatory(self):
         """"""

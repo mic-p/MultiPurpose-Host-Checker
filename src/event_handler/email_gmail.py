@@ -5,6 +5,7 @@
 # pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
 
 from libs.config import GlobalConfig
+import libs.constants as C
 
 import os
 
@@ -21,7 +22,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 SCOPES = 'https://www.googleapis.com/auth/gmail.send'
 #SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
-class EmailGmail(object):
+class Evt_EmailGmail(object):
     """msg_text = "MPHC error reporting\n--\n%s" % host_work.check_work.error_msg
         msg.set_content(msg_text)
         msg['subject'] = smtp_config.email_subject
@@ -42,7 +43,7 @@ class EmailGmail(object):
         self._host_work = host_work
         event_name = host_work.check_work.host.on_event
         self._gmail_config = self._gc.conf_event_handler[event_name]
-        self._gc.log.debug("Send email message via gmail: %s" % (event_name, ))
+        self._gc.log.debug("Send gmail email with: %s to: %s" % (event_name, self._gmail_config.email_to, ))
         
         self._cred = self._check_credentials()
         self.SendMessage()
@@ -71,7 +72,7 @@ class EmailGmail(object):
                 flow = InstalledAppFlow.from_client_secrets_file(
                     path_credential, SCOPES
                 )
-            creds = flow.run_local_server(port=0)
+                creds = flow.run_local_server(port=0)
             # Save the credentials for the next run
             with open(path_token, "w") as token:
               token.write(creds.to_json())
@@ -85,8 +86,19 @@ class EmailGmail(object):
         sender = self._gmail_config.email_from
         to = self._gmail_config.email_to
         subject = self._gmail_config.email_subject
-        msg_text = "MPHC error reporting\n--\n%s" % self._host_work.check_work.error_msg
-
+        host_work =  self._host_work
+        # assemble text message
+        
+        if host_work.check_work.report == C.CHECK_ERROR:
+            msg_text = "MPHC error\n--\n%s"
+        elif host_work.check_work.report == C.CHECK_MSG:
+            msg_text = "MPHC information reporting\n--\n%s"
+        elif host_work.check_work.report == C.CHECK_DISASTER:
+            msg_text = "MPHC disaster\n--\n%s"
+        else:
+            raise ValueError("Why here? %s" % host_work.check_work.report)
+        
+        msg_text = msg_text % host_work.check_work.report_msg.msg
         
         creds = self._cred
 
@@ -107,7 +119,6 @@ class EmailGmail(object):
         service.users().messages().send(userId="me", body=create_message).execute()
         
 
-
 def get_event_workers():
-    return EmailGmail
+    return Evt_EmailGmail
 

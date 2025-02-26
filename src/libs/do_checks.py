@@ -3,9 +3,10 @@
 import traceback
 
 from libs.config import GlobalConfig
-import libs.check_handlers as check_handlers
+from libs.objs import O_UnhandledError, O_CheckReport
 
-from libs.objs import O_GlobalError
+import libs.check_handlers as check_handlers
+import libs.constants as C
 
 class DoChecks(object):
     """"""
@@ -31,25 +32,56 @@ class DoChecks(object):
             hosts_list = obj_host.host_details or (obj_host.name, )
             for address in hosts_list:
                 # and call it!
+                
+                # verify the local data
+                if not self._gc.local_config.check_data[obj_host.name]:
+                    # first usage, startup the variables
+                    self._gc.local_config.check_data[obj_host.name] = {}
+                    self._gc.local_config.check_data[obj_host.name][address] = None
+                
+                ret_code = C.CHECK_ERROR
+                # try to catch all the exception unhandled
                 try:
-                    check_class.do_check(obj_host, address)
-                    if check_class.check_work.error and not self._gc.conf_mphc.continue_on_check_problem:
-                        self._gc.log.debug("Error happens on %s, stop checks" % check_name)
-                        break
-
+                    #call the event and check for the results
+                    ret_code, msg_ret = check_class.do_check(obj_host, address)
+                    
+                    # we had a problem somewhere with the check that raise an error, save it for future report 
+                    if ret_code == C.CHECK_ERROR:
+                        check_class.check_work.report_msg = O_UnhandledError("DoChecks::%s::%s" % (check_name, address), msg_ret)
+                        check_class.check_work.report = C.CHECK_ERROR
+                        self._gc.log.error(msg_ret)
+                    elif ret_code == C.CHECK_MSG:
+                        check_class.check_work.report_msg = O_CheckReport(msg_ret)
+                        check_class.check_work.report = C.CHECK_ERROR
                 except Exception as exc_obj:
                     # if there is an error doing the check, trace it has disaster and try to trace the exception
-                    check_class.check_work.error = 100
                     tb = traceback.format_exception(exc_obj)
-                    #tb_str = '\n'.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__))
-                    #msg = "Disaster on check: %s\n" % check_name
-                    #msg += tb_str
-                    #self._gc.log.error(msg)
+                    err = O_UnhandledError("DoChecks::%s::%s" % (check_name, address), tb)
+                    check_class.check_work.report = C.CHECK_DISASTER
+                    check_class.check_work.report_msg = err
+                    self._gc.log.error(err)
+                    ret_code = C.CHECK_ERROR
+                                        
+                if ret_code and not self._gc.conf_mphc.continue_on_check_problem:
+                    self._gc.log.debug("Error happens on %s, stop checks!" % check_name)
+                    break
+                
+                # verify if the check need to handle changes
+                if not check_class.handle_changes():
+                    continue
+                
+                if not self._gc.local_config.check_data[obj_host.name][address]:
+                    # no such configuration for self._host
+                    self._gc.local_config.check_data[obj_host.name][address] = msg_ret
+                else:
+                    # check if the data has changed
+                    old_data = self._gc.local_config.check_data[obj_host.name][address]
                     
-                    err = O_GlobalError("DoChecks::%s::%s" % (check_name, address), tb)
-                    self._gc.global_errors.append(err)
-                    
-                    if not self._gc.conf_mphc.continue_on_check_problem:
-                        self._gc.log.debug("Error happens on %s, stop checks" % check_name)
-                        break
+                    #and if yes
+                    if old_data != msg_ret:
+                        chk_rep = O_CheckReport(check_class.format_changes(old_data, msg_ret))
+                        check_class.check_work.report = C.CHECK_MSG
+                        check_class.check_work.report_msg = chk_rep
+                        #self._gc.global_messages.append(chk_rep)
+                        
 

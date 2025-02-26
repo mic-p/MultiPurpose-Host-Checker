@@ -12,6 +12,7 @@ from libs.objs import O_conf_event_handler_smtp, O_conf_event_handler_gmail, O_c
 
 import libs.check_handlers as check_handlers
 import libs.event_handlers as event_handlers
+import libs.local_config as local_config
 
 class Startup(metaclass=Singleton):
     __doc__ = """"Startup function. Instance and call only the startup method"""
@@ -63,8 +64,21 @@ class Startup(metaclass=Singleton):
         # at the end, check if all is ok
         self._startup_checks()
         
+        # load local configuration
+        self._load_local_config()
+        
         self._gc.startup_done = True
-
+    
+    def _load_local_config(self):
+        """Load local saved data"""
+        
+        # load saved data on fs
+        lc = local_config.LocalConfig()
+        self._gc.local_config.check_data, self._gc.local_config.previous_dt = lc.load()
+        
+        for check_name in self._gc.hosts_config:
+            self._gc.local_config.check_data.setdefault(check_name, None)
+    
     def _load_conf_ini_global(self):
         """"""
         #start to load the configuration from
@@ -106,7 +120,6 @@ class Startup(metaclass=Singleton):
 
         if not  os.path.isdir(self._gc.path_data):
             self._raise_err_exit("Path %s set into configuration is not a valid directory" % self._gc.path_data, 3)
-
 
     def _load_mphc_checks(self):
         """Load  checks from configuration"""
@@ -184,15 +197,14 @@ class Startup(metaclass=Singleton):
         for opt_name, v in data:
             ftype, fallback = v
             # load the function to load data (and type) from conf instance
-            if issubclass(ftype, int):
-                fcall_str = "getint"
-            elif issubclass(ftype, bool):
+            if issubclass(ftype, bool):
                 fcall_str = "getboolean"
+            elif issubclass(ftype, int):
+                fcall_str = "getint"
             elif issubclass(ftype, str):
                 fcall_str = "get"
             else:
                 raise ValueError("Type %s not supported" % str(ftype))
-            
             # set to the configuration the data loaded.
             # here we use a workaround for a BUG of configparser that raise an exception when getint is called and the option is empty... argh!
             if fcall_str in ("getint", "getboolean") and config.get(section, opt_name, fallback="") == "":

@@ -4,6 +4,8 @@ from libs.config import GlobalConfig
 from .base_check import BaseCheck
 from libs.objs import O_check_work
 
+import libs.constants as C
+
 import dns.resolver as D
 # https://gist.github.com/akshaybabloo/2a1df455e7643926739e934e910cbf2e
 
@@ -34,13 +36,34 @@ class Check_DnsChange(BaseCheck):
         self._host = host
         self.check_work.host = host
         
-        self._gc.log.debug("Start DNS Change check for: %s"% (host.name, ))
+        self._gc.log.debug("Start DNS Change check for: %s"% (address, ))
 
-        D.query
-        for x in D.resolve("microsoft.com", "TXT"): 
-            x.to_text()
-
+        ret_code = C.CHECK_ERROR
+        q_ret = []
+        try:
+            for x in D.resolve(self._address, host.specific_config.record_type):
+                ret = x.to_text()
+                q_ret.append(ret)
+            
+            ret_code = C.CHECK_OK
+        except Exception as err:
+            msg = (f"Unexpected {err=}, {type(err)=}")
+            q_ret = msg
+                
+        return (ret_code, q_ret)
     
+    def handle_changes(self):
+        """Indicate that we are able to handle changes"""
+        return True
+        
+    def format_changes(self, old, new):
+        """Format changes"""
+        
+        return "Dns record: %s for address: %s changed from: %s to %s" % (self._host.specific_config.record_type, self._address, old, new)
+
+    def _recursive_A_resolve(self, data):
+        """future feature for try to check all the DNS tree"""
+        
     def get_data_mandatory(self):
         """"""
         return self.__data_mandatory

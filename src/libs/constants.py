@@ -1,0 +1,6 @@
+# -*- coding: UTF-8 -*-
+
+CHECK_OK = 0
+CHECK_MSG = 1
+CHECK_ERROR = 2
+CHECK_DISASTER = 100

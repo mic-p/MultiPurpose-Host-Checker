@@ -3,6 +3,9 @@
 ___doc___ = """ Configuration objects.
 See mphc.conf.template and docs for explanations. Objs variables has the same names of the configurations keys.
 """
+
+import libs.constants as C
+
 class O_conf_mphc(object):
     """"""
     def __init__(self):
@@ -109,8 +112,7 @@ class O_conf_event_handler_cmd(_BaseObj):
     def __init__(self):
         super(O_conf_event_handler_cmd).__init__()
         """Set default variables"""
-        self.gmail_user = ""
-        self.gmail_password = ""
+        self.execute_cmd = ""
 
     def get_data_mandatory(self):
         """"""
@@ -134,9 +136,9 @@ class O_checks_done(object):
         """"""
         self._checks_done.append(check)
     
-    def get_errors(self):
+    def get_check_report(self):
         """"""
-        return [host for host in self._checks_done if host.check_work.error]
+        return [host for host in self._checks_done if host.check_work.report]
 
 class O_check_work():
     """Object that represent a working check"""
@@ -145,9 +147,10 @@ class O_check_work():
         # our working host instance O_conf_host
         self.host = None
         
-        # if != from 0, we have an error
-        self.error = 0
-        self.error_msg = ""
+        # if != from CHECK_OK, we need to report it
+        self.report = C.CHECK_OK
+        # must be O_UnhandledError, O_CheckReport
+        self.report_msg = None
 
 class O_conf_specific_host(object):
     """"""
@@ -172,6 +175,8 @@ class O_conf_host(_BaseObj):
         self.host_details = []
         
         self.specific_config = O_conf_specific_host()
+        
+        self.check_toreport = False
         
     def get_data_mandatory(self):
         """"""
@@ -202,11 +207,38 @@ class O_event_handlers(dict):
 class O_Hosts(dict):
     """Class that cointein the hosts"""
 
-class O_GlobalError(object):
+class O_UnhandledError(object):
     """Object that represent an unexpected error of the code"""
     def __init__(self, code_position, msg):
         """"""
         self.code_position = code_position
         self.msg = msg
+    
+    def __repr__(self):
+        """"""
+        return "<O_UnhandledError>: %s" % self.msg
+
+class O_CheckReport(object):
+    """Object that represent a check report. Not error, only a message from a check to report"""
+    
+    def __init__(self, msg):
+        """"""
+        self.msg = msg
+    
+    def __repr__(self):
+        """"""
+        return "<O_CheckReport>: %s" % self.msg
         
+class O_LocalConfig(object):
+    """Configuration for the local configuration where every check can save data
+        Every attribute will be saved with pickle
+    """
+    def __init__(self):
+        """"""
+        # seconds from the epoch of previous run
+        self.previous_dt = 0
         
+        # saved
+        self.check_data = dict()
+    
+    

@@ -27,21 +27,26 @@
 - execute_cmd: Execute a command. See the documentations for more details
 
 ## Installation
+- install dependances with:
+```
+pip install -r requirements.txt
+```
 - download the .zip|.tar.gz file
-- extract somewhere (/opt/MPHC)
+- extract somewhere (/opt/mphc)
 - copy configuration templates file from /opt/mphc/template to somewhere (/etc/mphc)
 - edit:
 	+ mphc.conf
 	+ hosts.conf
 - test it
 ```
-# has simple as
+# as simple as
 
 $ unzip mhpc.zip | tar xzf mphc.zip
 $ mv mphc /opt/mphc
+$ pip install -r /opt/mphc/requirements.txt
 $ mkdir /etc/mphc
-$ cp /opt/mphc/* /etc/mphc
-$ nano|vi /etc/mphc/*
+$ cp /opt/mphc/template/* /etc/mphc
+$ nano | vi /etc/mphc/*
 $ chmod +rx /opt/mphc/main.py
 $ ln -s /opt/mphc/main.py /usr/local/bin/mphc
 
