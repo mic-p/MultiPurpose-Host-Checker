@@ -1,6 +1,7 @@
 [global]
 # default generic configuration section
-# debug can be 0|1 (no, yes, false, true)
+# debug can be 0|1 (no, yes, false, true) | 2
+# 2 is used only by the develop process: not send emails and raise exceptions on errors
 debug = 1
 
 # MPHC cache path for save data

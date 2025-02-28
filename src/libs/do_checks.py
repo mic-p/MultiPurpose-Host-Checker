@@ -54,6 +54,8 @@ class DoChecks(object):
                         check_class.check_work.report_msg = O_CheckReport(msg_ret)
                         check_class.check_work.report = C.CHECK_ERROR
                 except Exception as exc_obj:
+                    if self._gc.debug == 2:
+                        raise
                     # if there is an error doing the check, trace it has disaster and try to trace the exception
                     tb = traceback.format_exception(exc_obj)
                     err = O_UnhandledError("DoChecks::%s::%s" % (check_name, address), tb)

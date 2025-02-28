@@ -27,13 +27,19 @@ class DoEventsHandler(object):
             event_class = evth_module.get_event_workers()()
             
             try:
-                event_class.do_event(host_work)
+                if self._gc.debug == 2:
+                    self._gc.log.debug("Skip calling :%s with: %s" % (event_name, event_class, ))
+                else:
+                    event_class.do_event(host_work)
             except Exception as exc_obj:
                 # if there is an error doing the check, trace it has disaster and try to trace the exception
                 tb = traceback.format_exception(exc_obj)
 
                 msg = "Disaster on Event: %s\n%s" % (event_name, tb)
                 self._gc.log.error(msg)
+                
+                if self._gc.debug == 2:
+                    raise
                 
                 #err = O_UnhandledError("DoEventsHandler::%s" % event_name, tb)
                 #self._gc.global_messages.append(err)

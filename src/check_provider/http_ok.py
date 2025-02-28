@@ -6,6 +6,7 @@ from libs.objs import O_check_work
 import libs.constants as C
 
 import http.client as http_client
+from urllib.parse import urlparse
 
 class Check_HttpOk(BaseCheck):
     """"""
@@ -40,12 +41,20 @@ class Check_HttpOk(BaseCheck):
             # verify if we need to connect with the S version of http
             if host.specific_config.use_https:
                 f = http_client.HTTPSConnection
+                prefix = "https://"
             else:
                 f = http_client.HTTPConnection
-            1/0
+                prefix = "http://"
+
             # connect
-            conn = f(self._address)
-            conn.request("GET", "/")
+            if not address.startswith("http"):
+                address = prefix + address
+            
+            # clean address
+            addr = urlparse(address)
+            
+            conn = f(addr.netloc)
+            conn.request("GET", addr.path or "/")
             reply = conn.getresponse()
             
             # verify response.
@@ -60,7 +69,7 @@ class Check_HttpOk(BaseCheck):
                     # retrieve all the server headers
                     k, v = item
                     q_ret+= "%s: %s\n" % (k, v)
-            self._gc.log.debug("HttpOk check. Return: %s" % (q_ret, ))
+            self._gc.log.debug("HttpOk check. Returns: %s" % (q_ret, ))
                 
         except Exception as err:
             raise err
