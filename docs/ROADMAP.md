@@ -4,7 +4,7 @@
 - End checks:
 	- dns_change -> Done
 	- http_ok -> Done (see to-do for evolutions and more infos)
-	- http_diff
+	- http_diff -> Done
 	- fs_exists
 	- fs_changes
 

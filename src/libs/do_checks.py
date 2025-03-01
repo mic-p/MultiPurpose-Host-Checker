@@ -54,8 +54,6 @@ class DoChecks(object):
                         check_class.check_work.report_msg = O_CheckReport(msg_ret)
                         check_class.check_work.report = C.CHECK_ERROR
                 except Exception as exc_obj:
-                    if self._gc.debug == 2:
-                        raise
                     # if there is an error doing the check, trace it has disaster and try to trace the exception
                     tb = traceback.format_exception(exc_obj)
                     err = O_UnhandledError("DoChecks::%s::%s" % (check_name, address), tb)
@@ -63,6 +61,9 @@ class DoChecks(object):
                     check_class.check_work.report_msg = err
                     self._gc.log.error(err)
                     ret_code = C.CHECK_ERROR
+                    
+                    if self._gc.debug == 2:
+                        raise
                                         
                 if ret_code and not self._gc.conf_mphc.continue_on_check_problem:
                     self._gc.log.debug("Error happens on %s, stop checks!" % check_name)
@@ -78,6 +79,7 @@ class DoChecks(object):
                 else:
                     # check if the data has changed
                     old_data = self._gc.local_config.check_data[obj_host.name][address]
+                    self._gc.local_config.check_data[obj_host.name][address] = msg_ret
                     
                     #and if yes
                     if old_data != msg_ret:
