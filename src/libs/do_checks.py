@@ -70,7 +70,7 @@ class DoChecks(object):
                     break
                 
                 # verify if the check need to handle changes
-                if not check_class.handle_changes():
+                if not check_class.handle_changes() or ret_code != C.CHECK_OK:
                     continue
                 
                 if not self._gc.local_config.check_data[obj_host.name][address]:

@@ -2,14 +2,17 @@
 
 import socket
 import difflib
+import http.client as http_client
+from urllib.parse import urlparse
+
+from bs4 import BeautifulSoup
 
 from libs.config import GlobalConfig
 from .base_check import BaseCheck
 from libs.objs import O_check_work
+
 import libs.constants as C
 
-import http.client as http_client
-from urllib.parse import urlparse
 
 class Check_HttpDiff(BaseCheck):
     """"""
@@ -69,6 +72,12 @@ class Check_HttpDiff(BaseCheck):
             if reply.status == 200:
                 ret_code = C.CHECK_OK
                 q_ret = reply.read()
+                bs = BeautifulSoup(q_ret, "html.parser")
+
+                body = bs.body                
+                
+                q_ret = "\n".join(x for x in body.strings)
+
             else:
                 # response are different from our need, inspect the status and the reason
                 ret_code = C.CHECK_MSG
@@ -91,14 +100,15 @@ class Check_HttpDiff(BaseCheck):
     def format_changes(self, old, new):
         """Format changes"""
         
-        old = old.splitlines(keepends=True)
-        new = new.splitlines(keepends=True)
-
-        d = difflib.Differ()
-        result = list(d.compare(old, new))
-        dta = "\n".join(result)
+        # cleanup pages part that has only white (\n, \t, ...) spaces
+        old = [x for x in old.splitlines(keepends=True) if x.strip()]
+        new = [x for x in new.splitlines(keepends=True) if x.strip()]
         
-        return "Http page %s change content:\n%s\n" % (self._address, dta)
+        dta = []
+        for r in (difflib.unified_diff(old, new)):
+            dta.append(r)
+        
+        return "Http page %s change content:\n%s\n" % (self._address, "\n".join(dta))
 
     def get_data_mandatory(self):
         """"""

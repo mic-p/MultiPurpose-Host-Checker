@@ -47,7 +47,10 @@ class LocalConfig(object):
         
         with open(self._file_storage, 'wb') as f:
             # Pickle the 'data' dictionary using the highest protocol available.
-            pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
+            try:pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
+            except:
+                print(data)
+                raise
 
         with open(self._last_run, 'w') as f:
             # Save current time
