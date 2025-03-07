@@ -1,5 +1,7 @@
 # -*- coding: UTF-8 -*-
 
+import os
+
 from libs.config import GlobalConfig
 from .base_check import BaseCheck
 from libs.objs import O_check_work
@@ -8,11 +10,11 @@ import libs.constants as C
 class Check_FsExists(BaseCheck):
     """"""
     __data_mandatory = (
-                            ("fs_path", (str, "")),  
+                            ("event_on_exists", (bool, 0)),
                         )
     __data_optional = (
                             #("check_icmp_count", (int, 4)), 
-                            #("", (str, "")), 
+                            #("", (fs_path, "")), 
                         )
     def __init__(self):
         """"""
@@ -31,7 +33,13 @@ class Check_FsExists(BaseCheck):
         self.check_work.host = host
         self._gc.log.debug("Start FS Exists check for: %s"% (host.name, ))
         
-        return (C.CHECK_OK, "")
+        exists = os.path.exists(address)
+        if self._host.specific_config.event_on_exists and exists:
+            return (C.CHECK_MSG, "FS exists: %s" % self._host.specific_config.event_on_exists)
+        elif not self._host.specific_config.event_on_exists and not exists:
+            return (C.CHECK_MSG, "FS not exists: %s" % self._host.specific_config.event_on_exists)
+        else:
+            return (C.CHECK_OK, "")
 
     def get_data_mandatory(self):
         """"""

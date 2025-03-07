@@ -40,16 +40,16 @@ check = dns_change
 # record type
 record_type = MX
 
-[local]
+[/tmp]
+# verify if path exists and execute event if not
 check = fs_exists
-fs_path = /tmp
 on_event = evth_smtp
+# the check can verify if path exists or not. if 1 on event_on_exists, do event only if the path exists, if 0 do event only if the path doesn't exists
+event_on_exists = 1
 
-[local_changes]
-check = fs_changes
-
+[/home]
 # verify and execute event on local path tree change
-fs_path = /home/
+check = fs_changes
 
 
 [s3:https://s3/repo]

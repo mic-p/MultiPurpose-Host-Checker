@@ -38,7 +38,7 @@ class Check_HttpDiff(BaseCheck):
         self._address = address
         self._host = host
         self.check_work.host = host
-        self._gc.log.debug("Start Httpdiff check for: %s"% (host.name, ))
+        self._gc.log.debug("Start Httpdiff check for: %s, %s"% (host.name, address))
     
         ret_code = C.CHECK_ERROR
         q_ret = ""

@@ -33,11 +33,11 @@ class DoChecks(object):
             for address in hosts_list:
                 # and call it!
                 
-                # verify the local data
+                # verify the local data where we'll save the local data
                 if not self._gc.local_config.check_data[obj_host.name]:
                     # first usage, startup the variables
                     self._gc.local_config.check_data[obj_host.name] = {}
-                    self._gc.local_config.check_data[obj_host.name][address] = None
+                self._gc.local_config.check_data[obj_host.name].setdefault(address, None)
                 
                 ret_code = C.CHECK_ERROR
                 # try to catch all the exception unhandled

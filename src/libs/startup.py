@@ -230,7 +230,7 @@ class Startup(metaclass=Singleton):
         
         self._mphc_host_config = config
         
-        # iterate over section and load coniguration
+        # iterate over section and load configuration
         for sec_name in config.sections():
             self._set_host_data_config(sec_name)
 
@@ -277,6 +277,14 @@ class Startup(metaclass=Singleton):
         # set the data into the obj configuration
         self._set_data_config_obj(self._mphc_host_config, host_name, data_mandatory_check, obj_host.specific_config)
         self._set_data_config_obj(self._mphc_host_config, host_name, data_option_check,  obj_host.specific_config)
+        
+        # load hosts from secondary file
+        host_details_path = self._mphc_host_config[host_name].get("host_details_path", fallback="")
+        if host_details_path:
+            if not os.path.exists(host_details_path):
+                raise FileExistsError("No such file: %s" % host_details_path)
+            with open(host_details_path) as host_details_path_f:
+                obj_host.host_details = [line.strip() for line in host_details_path_f.readlines() if line]
         
         self._gc.hosts_config[host_name] = obj_host
         
