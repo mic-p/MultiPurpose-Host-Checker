@@ -5,14 +5,12 @@
 	- dns_change -> Done
 	- http_ok -> Done (see to-do for evolutions and more infos)
 	- http_diff -> Done
+	- restic_snapshots -> Done
 	- fs_exists
 	- fs_changes
 
-- New Checks:
-	- restic backup verification
-
-- Enable multiple checks and multiple events handler
-- Enable multiple records for dns_change
+- Enable multiple checks and multiple events handler for single host
+- Enable multiple records for dns_change for single check
 
 ## Todo for v.2 (not planned)
 - New checks:

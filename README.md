@@ -19,6 +19,7 @@
 - fs_exists: check if a file or directory exists and if not, alert
 - fs_changes: check if someone modify your files
 - dns_change: check if DNS record is changed from the last check
+- restic_snapshots: verify if there is enought snapshots in the time period specified (accept only S3 and local repository, see TODO for more)
 - *other soon stay tuned or open a feature request*
 
 ## Event handler

@@ -13,9 +13,10 @@ class Evt_ExecuteCmd(object):
     def do_event(self, host_work):
         """"""
         event_name = host_work.check_work.host.on_event
+        host_name = host_work.check_work.host.name
         cmd_execute_config = self._gc.conf_event_handler[event_name]
         
-        self._gc.log.debug("ExecuteCmd: %s, %s" % (event_name,  cmd_execute_config.execute_cmd))
+        self._gc.log("ExecuteCmd: %s, Host: %s, Cmd: %s" % (event_name,  host_name, cmd_execute_config.execute_cmd))
         """
         # Execute commands. Possibile variables passed to cmd_to_execute
             # $c -> check|event name
@@ -24,6 +25,7 @@ class Evt_ExecuteCmd(object):
             # $f -> random path to a file that contains the information that the check|event returns to explain the error. It's up to the program delete it
         """
         ExecuteCmd().do_execute
+        
 
 def get_event_workers():
     return Evt_ExecuteCmd

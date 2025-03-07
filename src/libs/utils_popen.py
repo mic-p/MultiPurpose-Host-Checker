@@ -11,23 +11,24 @@ class ExecuteCmd(object):
         """"""
         self._gc = GlobalConfig()
         
-    def do_execute(self, cmd_exe,  vtimeout=None):
+    def do_execute(self, cmd_exe,  vtimeout=None, shell=False, ret_data=False, env_to_set=None):
         """Execute a command"""
         timeout_err = 0
         try:
-            p = subprocess.Popen(cmd_exe, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            p = subprocess.Popen(cmd_exe, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=shell, env=env_to_set)
             out, err = p.communicate(timeout=vtimeout)
         except subprocess.TimeoutExpired:
             timeout_err = 1
         except Exception as err:
             err = (f"Unexpected {err=}, {type(err)=}")
+            if self._gc.debug == 2:
+                raise
             
-        self._gc.log.debug("Command '%s', exit code: %s"% (cmd_exe, p.returncode, ))
         if p.returncode or timeout_err:
             if timeout_err:
                 msg = "Timeout on execute: %s" % err
             else:
-                msg = "Error on execute: %s" % err
+                msg = "Exit code: %s. Message error: %s" % (p.returncode, err)
             return (C.CHECK_ERROR, msg)
         else:
-            return (C.CHECK_OK, "")
+            return (C.CHECK_OK, out if ret_data else "")

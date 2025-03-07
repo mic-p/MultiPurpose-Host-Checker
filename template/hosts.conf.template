@@ -37,6 +37,7 @@ on_event = evth_smtp
 
 [amazon.com]
 check = dns_change
+# record type
 record_type = MX
 
 [local]
@@ -46,5 +47,30 @@ on_event = evth_smtp
 
 [local_changes]
 check = fs_changes
+
+# verify and execute event on local path tree change
 fs_path = /home/
-# no event presents, inherit from default
+
+
+[s3:https://s3/repo]
+check = restic_snapshots
+# mandatory
+restic_pwd =
+
+#access_key to pass to restic. if not present (local repos?) we don't pass it to restic
+access_key =
+
+#secret_key to pass to restic. if not present (local repos?) we don't pass it to restic
+secret_key =
+
+# how many snapshots did you expect?
+min_snapshots = 5
+
+# in which period should we analyze the min_snapshots?
+snapshots_period = 2d
+
+# restic repository uri. if not present, we use the section name
+#restic_repo =
+
+# restic exe path. if none, restic must be on path
+# restic_exe =

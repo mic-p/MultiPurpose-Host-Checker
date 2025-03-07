@@ -3,6 +3,8 @@
 import traceback
 
 from libs.config import GlobalConfig
+from libs.report_msgs import check_build_msgs
+
 #from libs.objs import O_UnhandledError
 
 class DoEventsHandler(object):
@@ -29,8 +31,11 @@ class DoEventsHandler(object):
             try:
                 if self._gc.debug == 2:
                     self._gc.log.debug("Skip calling :%s with: %s" % (event_name, event_class, ))
+                    msg_text = check_build_msgs(host_work.check_work.report) % host_work.check_work.report_msg.msg
+                    self._gc.log.debug("Message not sent: %s" % msg_text)
                 else:
                     event_class.do_event(host_work)
+                        
             except Exception as exc_obj:
                 # if there is an error doing the check, trace it has disaster and try to trace the exception
                 tb = traceback.format_exception(exc_obj)

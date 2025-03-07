@@ -5,7 +5,7 @@
 # pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
 
 from libs.config import GlobalConfig
-import libs.constants as C
+from libs.report_msgs import check_build_msgs
 
 import os
 
@@ -19,8 +19,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 
-SCOPES = 'https://www.googleapis.com/auth/gmail.send'
-#SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
+SCOPES = ["https://www.googleapis.com/auth/gmail.readonly", 'https://www.googleapis.com/auth/gmail.send']
 
 class Evt_EmailGmail(object):
     """msg_text = "MPHC error reporting\n--\n%s" % host_work.check_work.error_msg
@@ -41,13 +40,14 @@ class Evt_EmailGmail(object):
     def do_event(self, host_work):
         """"""
         self._host_work = host_work
+        host_name = host_work.check_work.host.name
         event_name = host_work.check_work.host.on_event
         self._gmail_config = self._gc.conf_event_handler[event_name]
-        self._gc.log.debug("Send gmail email with: %s to: %s" % (event_name, self._gmail_config.email_to, ))
+        self._gc.log.debug("Send gmail email for Host: %s with: %s to: %s" % (host_name, event_name, self._gmail_config.email_to, ))
         
         self._cred = self._check_credentials()
         self.SendMessage()
-
+        
     def _check_credentials(self):
         """ check and return credentials
         https://developers.google.com/gmail/api/quickstart/python
@@ -64,7 +64,7 @@ class Evt_EmailGmail(object):
         # time.
         if os.path.exists(path_token):
             creds = Credentials.from_authorized_user_file(path_token, SCOPES)
-            # If there are no (valid) credentials available, let the user log in.
+        # If there are no (valid) credentials available, let the user log in.
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
@@ -73,10 +73,10 @@ class Evt_EmailGmail(object):
                     path_credential, SCOPES
                 )
                 creds = flow.run_local_server(port=0)
-            # Save the credentials for the next run
-            with open(path_token, "w") as token:
-              token.write(creds.to_json())
-              
+        # Save the credentials for the next run
+        with open(path_token, "w") as token:
+            token.write(creds.to_json())
+
         return creds
 
     def SendMessage(self, attachmentFile=None):
@@ -89,15 +89,7 @@ class Evt_EmailGmail(object):
         host_work =  self._host_work
         # assemble text message
         
-        if host_work.check_work.report == C.CHECK_ERROR:
-            msg_text = "MPHC error\n--\n%s"
-        elif host_work.check_work.report == C.CHECK_MSG:
-            msg_text = "MPHC information reporting\n--\n%s"
-        elif host_work.check_work.report == C.CHECK_DISASTER:
-            msg_text = "MPHC disaster\n--\n%s"
-        else:
-            raise ValueError("Why here? %s" % host_work.check_work.report)
-        
+        msg_text = check_build_msgs(host_work.check_work.report)
         msg_text = msg_text % host_work.check_work.report_msg.msg
         
         creds = self._cred

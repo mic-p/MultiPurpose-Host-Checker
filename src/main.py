@@ -17,18 +17,18 @@ class Work():
         st.DoStartupWork()
         
         self._gc = GlobalConfig()
-        self._gc.log.debug("Startup done! Start to check hosts")
+        self._gc.log("Startup done! Start to check hosts")
         
         # start the checks
         checks = do_checks.DoChecks()
         checks.DoChecksWork()
         
-        self._gc.log.debug("Checks done! Start event handler")
+        self._gc.log("Checks done! Start event handler")
         
         events = do_events_handler.DoEventsHandler()
         events.DoEventWork()
         
-        self._gc.log.debug("Events done! Start check for errors")
+        self._gc.log("Events done! Start check for errors")
         
         end_work = do_end_work.DoEndWork()
         ret_code = end_work.DoEndWork()
@@ -36,11 +36,13 @@ class Work():
         if ret_code == C.CHECK_ERROR:
             msg_exit = "Some errors presents, exit 1"
             err_exit = 1
+            f = self._gc.log.error
         else:
             msg_exit = "That's all, goodbye. See you next time!"
+            f = self._gc.log
             err_exit = 0
         
-        self._gc.log.debug(msg_exit)
+        f(msg_exit)
         sys.exit(err_exit)
         
         

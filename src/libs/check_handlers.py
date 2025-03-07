@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-from check_provider import fs_exists, fs_changes, http_diff, http_ok, icmp,  dns_change
+from check_provider import fs_exists, fs_changes, http_diff, http_ok, icmp,  dns_change, restic_snaphosts
 
 
 # to move to a better place and dynamic checks load
@@ -9,7 +9,8 @@ LST_CHECKS = {"fs_exists": fs_exists,
                         "http_diff": http_diff,
                         "http_ok": http_ok,
                         "icmp": icmp, 
-                        "dns_change": dns_change}
+                        "dns_change": dns_change, 
+                        "restic_snapshots": restic_snaphosts}
 
 class CheckHandlers(object):
     """"""

@@ -87,10 +87,12 @@ class Check_Icmp(BaseCheck):
         ping_cmd = [str(x).strip() for x in ping_cmd]
 
         cmd_exe = ping_cmd +[self._address]
-        self._gc.log.debug("Start ICMP check: %s"% (self._address, ))
+        
+        self._gc.log.debug("Execute ICMP command: %s"% (cmd_exe, ))
         
         timeout_max = self._host.specific_config.interval * self._host.specific_config.timeout + 5
-        return ExecuteCmd().do_execute(cmd_exe, timeout_max)
+        errcode, msg = ExecuteCmd().do_execute(cmd_exe, timeout_max)
+        return (errcode, msg)
         
     def get_data_mandatory(self):
         """"""
