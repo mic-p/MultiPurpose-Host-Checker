@@ -13,15 +13,7 @@
 	+ add port to connect to
 	+ multiple ret code accepted
 - restic_snapshots:
-	- accepted only S3 and local repository, do all the code work for accept via mhpc.conf and env vars:
-		+ Azure Blob
-		+ Google Cloud Storage
-		+ rclone
-		+ sftp
-		+ rest
-		+ OpenStack Swift
-		+ B2
-	- accept --repository-file
+	+ accept --repository-file
 
 ## TODO list (sparse format)
 - Documentation (wiki)

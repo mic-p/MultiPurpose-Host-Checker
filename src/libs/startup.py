@@ -115,13 +115,13 @@ class Startup(metaclass=Singleton):
     def _startup_checks(self):
         """Do startup check after global configuration load"""
 
-        self._load_mphc_checks()
+        self._load_event_handlers()
         self._load_config_hosts()
 
         if not  os.path.isdir(self._gc.path_data):
             self._raise_err_exit("Path %s set into configuration is not a valid directory" % self._gc.path_data, 3)
 
-    def _load_mphc_checks(self):
+    def _load_event_handlers(self):
         """Load  checks from configuration"""
         # list of providers's configuration.
         # we create simply method for loading the .ini data with type and default values
@@ -134,9 +134,9 @@ class Startup(metaclass=Singleton):
             if not type_ in self._available_event_handlers:
                 raise ValueError("Value type %s of section %s not supported" % (type_,  sec_name))
             
-            self._set_mphc_global_data_config(type_, sec_name)
+            self._load_event_config(type_, sec_name)
 
-    def _set_mphc_global_data_config(self, type_, section):
+    def _load_event_config(self, type_, section):
         """"""
         # check the type and instance the correct event
         if type_ == "smtp":
@@ -163,7 +163,7 @@ class Startup(metaclass=Singleton):
         self._set_data_config_obj(self._mphc_global_config,section, data_option,  Obj_event_handler)
     
     def _check_config_mandatory(self, config, section, data):
-        """"""
+        """Generic verification of the mandatory configuration"""
         # retrieve only the option names. see __data_mandatory and __data_optional from objs
         opts_mandatory = [x[0] for x in data]
         # retrieve all the options into the section
@@ -175,7 +175,7 @@ class Startup(metaclass=Singleton):
                 raise ValueError(msg)
                 
     def _check_config_options(self, config, section, data,  exclude_check=None):
-        """verify that option presents into the configuration are allowed"""
+        """Verify if the options presents into the configuration are allowed"""
         exclude_check = exclude_check if exclude_check else ()
         opts_allowed = [x[0] for x in data[0]] + [x[0] for x in data[1]]
         
@@ -183,7 +183,7 @@ class Startup(metaclass=Singleton):
             if opt in exclude_check:
                 continue
             if not opt in opts_allowed:
-                msg = "Option %s presente but not allowed in section %s" % (opt, section)
+                msg = "Option %s present but not allowed in section %s" % (opt, section)
                 self._gc.log.error(msg)
                 raise ValueError(msg)
     
@@ -219,10 +219,6 @@ class Startup(metaclass=Singleton):
             
     def _load_config_hosts(self):
         """Load host configuration into the specific objects"""
-        # load data from checks
-        
-        for check_name in self._available_checks:
-            self._gc.checks[check_name] = check_handlers.get_check_class(check_name).get_check_workers()
         
         # load configuration from files
         config = configparser.ConfigParser()
@@ -232,15 +228,13 @@ class Startup(metaclass=Singleton):
         
         # iterate over section and load configuration
         for sec_name in config.sections():
-            self._set_host_data_config(sec_name)
+            self._load_check_host_config(sec_name)
 
-    def _set_host_data_config(self, host_name):
+    def _load_check_host_config(self, host_name):
         """Load for every hostname the config, controlling the data that came from config"""
         obj_host = O_conf_host()
         obj_host.name = host_name
-        
-        data_mandatory, data_option = obj_host.get_data_mandatory(),  obj_host.get_data_optional()
-        
+                
         # verify if there is the "check" option into config
         if not "check" in self._mphc_host_config[host_name]:
             msg = "No such option check in: %s connfiguration" % host_name
@@ -254,29 +248,16 @@ class Startup(metaclass=Singleton):
             self._gc.log.error(msg)
             raise ValueError(msg)
             
-        # verify mandatory and option data for host plus the specific data that check needs
-        data_mandatory_check = [x for x in data_mandatory] + [x for x in self._gc.checks[check_name]().get_data_mandatory()]
-        data_option_check = [x for x in data_option] + [x for x in self._gc.checks[check_name]().get_data_optional()]
-        
-        # verify the mandatory configuration
-        self._check_config_mandatory(self._mphc_host_config, host_name, data_mandatory_check)
-        # and the optional one
-        self._check_config_options(self._mphc_host_config, host_name, (data_mandatory_check,  data_option_check))
-        
         # check if requested event exists
         on_event_data = self._mphc_host_config[host_name].get("on_event")
         if not on_event_data in self._gc.conf_event_handler:
             msg = "Event handler %s not available" % on_event_data
             self._gc.log.error(msg)
             raise ValueError(msg)
-        
+
         # set the correct data
         obj_host.on_event = on_event_data
         obj_host.check = check_name
-        
-        # set the data into the obj configuration
-        self._set_data_config_obj(self._mphc_host_config, host_name, data_mandatory_check, obj_host.specific_config)
-        self._set_data_config_obj(self._mphc_host_config, host_name, data_option_check,  obj_host.specific_config)
         
         # load hosts from secondary file
         host_details_path = self._mphc_host_config[host_name].get("host_details_path", fallback="")
@@ -288,6 +269,38 @@ class Startup(metaclass=Singleton):
         
         self._gc.hosts_config[host_name] = obj_host
         
+        # now check if the check configuration are valid
+        self._load_check_config(obj_host, host_name, check_name)
+    
+    def _load_check_config(self, obj_host, host_name, check_name):
+        """Load and check if the configuration are valid for specific check"""
+        
+        data_mandatory, data_option = obj_host.get_data_mandatory(),  obj_host.get_data_optional()
+
+        # load data from checks
+        checks = {}
+        for cn in self._available_checks:
+            checks[cn] = check_handlers.get_check_class(check_name).get_check_workers()
+
+        # collect the generic mandatory+optional data for host plus the specific data that check needs
+        data_mandatory_check = [x for x in data_mandatory] + [x for x in checks[check_name]().get_data_mandatory()]
+        data_option_check = [x for x in data_option] + [x for x in checks[check_name]().get_data_optional()]
+        # verify the mandatory configuration
+        self._check_config_mandatory(self._mphc_host_config, host_name, data_mandatory_check)
+        # and the optional one
+        self._check_config_options(self._mphc_host_config, host_name, (data_mandatory_check,  data_option_check))
+
+        # set the data into the obj configuration
+        self._set_data_config_obj(self._mphc_host_config, host_name, data_mandatory_check, obj_host.specific_config)
+        self._set_data_config_obj(self._mphc_host_config, host_name, data_option_check,  obj_host.specific_config)
+        
+        # leave the check verify the configuration, if need
+        checks[check_name]().startup_config_checks(obj_host)
+        
+        # and load internal configuration, if need
+        checks[check_name]().startup_load(obj_host)
+        
+    
     def _raise_err_parse(self, parser, msg=""):
         """parse error, exit please"""
         parser.print_help(sys.stderr)

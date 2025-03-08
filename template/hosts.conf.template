@@ -54,8 +54,13 @@ check = fs_changes
 
 [s3:https://s3/repo]
 check = restic_snapshots
-# mandatory
+# mandatory or restic_envs_file
 restic_pwd =
+
+# variables in 'restic_envs_file' is read and exported to restic command.
+# syntax is:
+# VARIABLE = value
+#restic_envs_file = /etc/mphc/restic_env.conf
 
 #access_key to pass to restic. if not present (local repos?) we don't pass it to restic
 access_key =

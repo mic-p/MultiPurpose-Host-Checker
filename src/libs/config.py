@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 from .utils import  Singleton
-from .objs import O_conf_log, O_conf_mphc, O_checks, O_Hosts, O_checks_done, O_event_handlers, O_LocalConfig
+from .objs import O_conf_log, O_conf_mphc, O_Hosts, O_checks_done, O_event_handlers, O_LocalConfig
 
 class GlobalConfig(metaclass=Singleton):
     """Global container. Here we have:
@@ -17,9 +17,6 @@ class GlobalConfig(metaclass=Singleton):
         # commands to execute on some events error. see @doc for more info
         self.execute_cmd_event_error = ""
         self.execute_cmd_global_error = ""
-        
-        # checks list
-        self.checks = O_checks()
         
         # event handlers list
         self.event_handles = O_event_handlers()

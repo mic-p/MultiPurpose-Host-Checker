@@ -2,6 +2,8 @@
 
 import json
 import time
+import os
+
 from libs.config import GlobalConfig
 from libs import timeparse
 from libs.objs import O_check_work
@@ -9,19 +11,22 @@ from libs.utils_popen import ExecuteCmd
 from .base_check import BaseCheck
 
 import libs.constants as C
+import libs.utils as utils
 
 class Check_Restic_snaphosts(BaseCheck):
     """"""
     __data_mandatory = (
-                            ("restic_pwd", (str, "")),
+                            #("", (str, "")),
                         )
     __data_optional = (
                             ("min_snapshots", (int, 1)),
                             ("snapshots_period", (str, "2d")),
                             ("restic_repo", (str, "")),
                             ("restic_exe", (str, "restic")),
+                            ("restic_pwd", (str, "")),
                             ("access_key", (str, "")),
                             ("secret_key", (str, "")),
+                            ("restic_envs_file", (str, "")),
                             #("", (str, "")),
                         )
     def __init__(self):
@@ -49,16 +54,21 @@ class Check_Restic_snaphosts(BaseCheck):
         self._gc.log.debug("Execute Restic command: %s"% (cmd_exe, ))
         
         # create the env
-        env = {}
-        data_env_toset =  (
-                            ("access_key", "AWS_ACCESS_KEY_ID"), 
-                            ("secret_key", "AWS_SECRET_ACCESS_KEY"), 
-                            ("restic_pwd", "RESTIC_PASSWORD"), 
-                    )
-        for k_conf, k_env in data_env_toset:
-            dta = getattr(host.specific_config, k_conf) 
-            if dta:
-                env[k_env] = dta
+        # if there is a specific env load, use it
+        if host.specific_config.env:
+            env = host.specific_config.env
+        else:
+            # unless use the one found on config
+            env = {}
+            data_env_toset =  (
+                                ("access_key", "AWS_ACCESS_KEY_ID"), 
+                                ("secret_key", "AWS_SECRET_ACCESS_KEY"), 
+                                ("restic_pwd", "RESTIC_PASSWORD"), 
+                        )
+            for k_conf, k_env in data_env_toset:
+                dta = getattr(host.specific_config, k_conf) 
+                if dta:
+                    env[k_env] = dta
         
         # and call the restic cmd
         errcode, msg = ExecuteCmd().do_execute(cmd_exe, ret_data=True, env_to_set=env)
@@ -91,8 +101,26 @@ class Check_Restic_snaphosts(BaseCheck):
         #print (snap_time, time_min)
         return (errcode, msg)
         
+    def startup_config_checks(self, config_obj):
+        """Do startup configuration verification before start the work"""
         
+        if not (config_obj.specific_config.restic_envs_file or config_obj.specific_config.restic_pwd):
+            raise ValueError("No such file 'restic_envs_file' or 'restic_pwd' directive on: %s" % config_obj.name)
+        
+    def startup_load(self, config_obj):
+        """Load internal data"""
+        
+        # create env for future use
+        config_obj.specific_config.env = {}
+        
+        # continue only if the file exists
+        if not (config_obj.specific_config.restic_envs_file and os.path.exists(config_obj.specific_config.restic_envs_file)):
+            return
+        
+        # load the conf file and save it
+        config_obj.specific_config.env = utils.conf_file_to_dict(config_obj.specific_config.restic_envs_file)
 
+        
     def get_data_mandatory(self):
         """"""
         return self.__data_mandatory

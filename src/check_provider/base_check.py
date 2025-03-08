@@ -8,19 +8,25 @@ class BaseCheck(object):
         # 
         if type(self).__bases__[0] is object:
             raise NotImplementedError
-                
+    
+    def startup_config_checks(self, data):
+        """Do startup configuration verification before start the work"""
+    
+    def startup_load(self, data):
+        """Autonomous startup load of internal parameters"""
+    
     def format_changes(self):
-        """"""
+        """If the check handle changes, format them and return the informations"""
         return ""
     
     def handle_changes(self):
-        """"""
+        """Does the check handle the changes from one run to the next?"""
         return False
     
     def get_data_mandatory(self):
-        """"""
+        """Return the mandatory configuration data need by the check"""
         raise NotImplementedError
     
     def get_data_optional(self):
-        """"""
+        """Return the optional configuration data need by the check"""
         raise NotImplementedError

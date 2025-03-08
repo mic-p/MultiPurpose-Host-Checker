@@ -198,9 +198,6 @@ class O_conf_host_detail(object):
     def __repr__(self):
         return "<O_conf_host_detail>lst_hosts: %s" % (self.lst_hosts, )
 
-class O_checks(dict):
-    """Class that contain the checks"""
-
 class O_event_handlers(dict):
     """Class that contain the events"""
 
