@@ -57,6 +57,9 @@ check = restic_snapshots
 # mandatory or restic_envs_file
 restic_pwd =
 
+# restic tag filter to set
+restic_tags =
+
 # variables in 'restic_envs_file' is read and exported to restic command.
 # syntax is:
 # VARIABLE = value

@@ -22,6 +22,7 @@ class Check_Restic_snaphosts(BaseCheck):
                             ("min_snapshots", (int, 1)),
                             ("snapshots_period", (str, "2d")),
                             ("restic_repo", (str, "")),
+                            ("restic_tags", (str, "")),
                             ("restic_exe", (str, "restic")),
                             ("restic_pwd", (str, "")),
                             ("access_key", (str, "")),
@@ -50,6 +51,10 @@ class Check_Restic_snaphosts(BaseCheck):
         cmd_exe = [host.specific_config.restic_exe, "-r", 
                     host.specific_config.restic_repo if host.specific_config.restic_repo else host.name, 
                     "snapshots", "--latest", str(host.specific_config.min_snapshots), "--json"]
+        
+        # if we want to retrieve only some tags, specify them
+        if host.specific_config.restic_tags:
+            cmd_exe += ["--tag", host.specific_config.restic_tags]
         
         self._gc.log.debug("Execute Restic command: %s"% (cmd_exe, ))
         
@@ -90,6 +95,7 @@ class Check_Restic_snaphosts(BaseCheck):
         
         # if not enough, return a message
         if len(snap_after) >= host.specific_config.min_snapshots:
+            self._gc.log.debug("Restic snapshots. Enough snap: %s" % len(snap_after))
             return (C.CHECK_OK, "")
         else:
             return (C.CHECK_MSG, "Not enough snapshots for %s: %s, we need: %s in period: %s" % (

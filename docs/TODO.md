@@ -12,8 +12,6 @@
 - http_ok:
 	+ add port to connect to
 	+ multiple ret code accepted
-- restic_snapshots:
-	+ accept --repository-file
 
 ## TODO list (sparse format)
 - Documentation (wiki)
