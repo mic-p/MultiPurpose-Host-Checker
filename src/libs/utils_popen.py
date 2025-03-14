@@ -21,8 +21,8 @@ class ExecuteCmd(object):
             timeout_err = 1
         except Exception as err:
             err = (f"Unexpected {err=}, {type(err)=}")
-            if self._gc.debug == 2:
-                raise
+            if self._gc.debug >= C.LOG_DEBUG_DEBUG:
+                raise err
             
         if p.returncode or timeout_err:
             if timeout_err:

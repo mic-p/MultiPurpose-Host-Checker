@@ -7,6 +7,7 @@ import configparser
 from libs.config import GlobalConfig
 from libs.utils import  Singleton
 from libs.log import Logging
+from libs.utils import load_data_opt
 
 from libs.objs import O_conf_event_handler_smtp, O_conf_event_handler_gmail, O_conf_event_handler_cmd, O_conf_host
 
@@ -86,29 +87,30 @@ class Startup(metaclass=Singleton):
         config.read(self._startup_args.config)
         
         #load global MPHC configuration
-        self._gc.debug = config.getint("global",  "debug",  fallback=0)
-        self._gc.conf_mphc.continue_on_check_problem = config.getboolean("global",  "continue_on_check_problem",  fallback=1)
-        self._gc.path_data = config.get("global",  "path_data",  fallback="")
-        self._gc.conf_mphc.execute_cmd_event_error = config.get("global", "execute_cmd_event_error",  fallback="")
-        self._gc.conf_mphc.execute_cmd_global_error = config.get("global", "execute_cmd_global_error",  fallback="")
+        # config, section, opt_name, ftype, fallback 
+        self._gc.debug = load_data_opt(config, "global", "debug", int, 0)
+        self._gc.conf_mphc.continue_on_check_problem = load_data_opt(config, "global", "continue_on_check_problem", bool, 1)
+        self._gc.path_data = load_data_opt(config, "global", "path_data", str, "")
+        self._gc.conf_mphc.execute_cmd_event_error = load_data_opt(config, "global", "execute_cmd_event_error", str, "")
+        self._gc.conf_mphc.execute_cmd_global_error = load_data_opt(config, "global", "execute_cmd_global_error", str, "") 
         
         # load configuration for logger, so the code can use it
-        _logger = config.get("global", "logger")
+        _logger = load_data_opt(config, "global",  "logger", str)
         if _logger in ("syslog", "file"):
             self._gc.conf_log.logger = _logger
             if _logger == "syslog":
-                _syslog_host = config.get("global", "logger_syslog_host")
+                _syslog_host = load_data_opt(config, "global",  "logger_syslog_host", str)
                 if not _syslog_host:
                     self._gc.conf_log.logger_syslog_host = "/dev/log"
                 else:
                     self._gc.conf_log.logger_syslog_host = _syslog_host
-                    self._gc.conf_log.logger_syslog_port = config.get("logger", "logger_syslog_port") or 514
+                    self._gc.conf_log.logger_syslog_port = load_data_opt(config, "global", "logger_syslog_port", int, 514)
             else:
-                self._gc.conf_log.logger_file = config.get("global", "logger_file", fallback="")
+                self._gc.conf_log.logger_file = load_data_opt(config, "global", "logger_file", str)
         elif not _logger:
             self._gc.conf_log.logger = ""
         else:
-            self._gc.conf_log.logger = config.getboolean("global", "logger")
+            self._gc.conf_log.logger = _logger
             
         self._mphc_global_config = config
 
@@ -196,25 +198,7 @@ class Startup(metaclass=Singleton):
         """
         for opt_name, v in data:
             ftype, fallback = v
-            # load the function to load data (and type) from conf instance
-            if issubclass(ftype, bool):
-                fcall_str = "getboolean"
-            elif issubclass(ftype, int):
-                fcall_str = "getint"
-            elif issubclass(ftype, str):
-                fcall_str = "get"
-            else:
-                raise ValueError("Type %s not supported" % str(ftype))
-            # set to the configuration the data loaded.
-            # here we use a workaround for a BUG of configparser that raise an exception when getint is called and the option is empty... argh!
-            if fcall_str in ("getint", "getboolean") and config.get(section, opt_name, fallback="") == "":
-                    if not fallback:
-                        valuetoset = 0
-                    else:
-                        valuetoset = fallback
-            else:
-                fcall = getattr(config, fcall_str)
-                valuetoset = fcall(section, opt_name, fallback=fallback)
+            valuetoset = load_data_opt(config, section, opt_name, ftype, fallback)
             setattr(obj_toset, opt_name, valuetoset)
             
     def _load_config_hosts(self):
@@ -237,7 +221,7 @@ class Startup(metaclass=Singleton):
                 
         # verify if there is the "check" option into config
         if not "check" in self._mphc_host_config[host_name]:
-            msg = "No such option check in: %s connfiguration" % host_name
+            msg = "No such option check in: %s configuration" % host_name
             self._gc.log.error(msg)
             raise ValueError(msg)
         

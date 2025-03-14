@@ -18,6 +18,7 @@ priority = 1
 [www.google.com]
 # which check apply
 check = http_ok
+http_status_ok = 200, 201
 use_https = 0
 # which event do on negative response
 on_event = evth_gmail

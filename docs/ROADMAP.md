@@ -9,8 +9,8 @@
 	- ~~fs_exists~~ -> Done
 	- ~~fs_changes~~ -> Done
 
-- Enable multiple checks and multiple events handler for single host
-- Enable multiple records for dns_change for single check
+- Enable multiple checks and ~~multiple events handler for single host~~
+- ~~Enable multiple records for dns_change for single check~~
 
 ## Todo for v.2 (not planned)
 - New checks:

@@ -2,7 +2,7 @@
 
 from libs.config import GlobalConfig
 from .base_check import BaseCheck
-from libs.objs import O_check_work
+from libs.objs import O_check_work, T_AInt
 import libs.constants as C
 
 import http.client as http_client
@@ -15,7 +15,7 @@ class Check_HttpOk(BaseCheck):
                         )
     __data_optional = (
                             ("use_https", (bool, 1)),
-                            #("", (str, "")), 
+                            ("http_status_ok", (T_AInt, "200")), 
                         )
     def __init__(self):
         """"""
@@ -35,7 +35,6 @@ class Check_HttpOk(BaseCheck):
         self._gc.log.debug("Start HttpOk check for: %s"% (host.name, ))
     
         ret_code = C.CHECK_ERROR
-        q_ret = ""
         
         try:
             # verify if we need to connect with the S version of http
@@ -59,12 +58,14 @@ class Check_HttpOk(BaseCheck):
             
             # verify response.
             # TO-DO: implement config array into the configuratio
-            if reply.status == 200:
+            
+            if reply.status in host.specific_config.http_status_ok:
                 ret_code = C.CHECK_OK
+                q_ret = "Ok! %s" % reply.status
             else:
                 # response are different from our need, inspect the status and the reason
                 ret_code = C.CHECK_MSG
-                q_ret = "%s: %s(%s)\nDetails:\n" % (address, reply.status, reply.reason)
+                q_ret = "Error! %s: %s(%s)\nDetails:\n" % (address, reply.status, reply.reason)
                 for item in reply.msg.items():
                     # retrieve all the server headers
                     k, v = item

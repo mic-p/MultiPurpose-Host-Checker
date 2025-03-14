@@ -25,7 +25,6 @@ class O_conf_log(object):
     def __repr__(self):
         return "<O_conf_log>logger: %s, logger_file: %s" % (self.logger, self.logger_file)
 
-
 class _BaseObj(object):
     """Base class for event handler"""
     def get_data_mandatory(self):
@@ -35,6 +34,18 @@ class _BaseObj(object):
     def get_data_optional(self):
         """"""
         raise NotImplementedError
+
+class _BaseDirObj(object):
+    """Base obj that export the """
+    def __dir(self):
+        d = {}
+        for x in self.__dict__:
+            if not x.startswith("_"):
+                d[x] = self.__dict__[x]
+        return d
+        
+    def _repr(self):
+        return ("; ".join(['%s: %s' % (key, value) for (key, value) in self.__dir().items()]))
 
 class O_conf_event_handler_smtp(_BaseObj):
     """Simple event configuration container for smtp configuration"""
@@ -152,9 +163,11 @@ class O_check_work():
         # must be O_UnhandledError, O_CheckReport
         self.report_msg = None
 
-class O_conf_specific_host(object):
+class O_conf_specific_host(_BaseDirObj):
     """"""
-
+    def __repr__(self):
+        return "<O_conf_specific_host>data: %s" % self._repr()
+    
 class O_conf_host(_BaseObj):
     """Host configuration container"""
     __data_mandatory = (
@@ -238,4 +251,9 @@ class O_LocalConfig(object):
         # saved
         self.check_data = dict()
     
+
+# Class that represent the types loaded from config
+class T_AStr(object): pass
+class T_AInt(object): pass
+class T_AList(object): pass
     

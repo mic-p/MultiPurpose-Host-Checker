@@ -43,6 +43,8 @@ class DoChecks(object):
                 # try to catch all the exception unhandled
                 try:
                     #call the event and check for the results
+                    if self._gc.debug == C.LOG_DEBUG_DDEBUG:
+                        self._gc.log.debug("specific_config: %s" % obj_host.specific_config)
                     ret_code, msg_ret = check_class.do_check(obj_host, address)
                     
                     # we had a problem somewhere with the check that raise an error, save it for future report 
@@ -62,7 +64,7 @@ class DoChecks(object):
                     self._gc.log.error(err)
                     ret_code = C.CHECK_ERROR
                     
-                    if self._gc.debug == 2:
+                    if self._gc.debug >= C.LOG_DEBUG_DEBUG:
                         raise
                                         
                 if ret_code and not self._gc.conf_mphc.continue_on_check_problem:

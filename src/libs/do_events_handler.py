@@ -2,6 +2,7 @@
 
 import traceback
 
+import libs.constants as C
 from libs.config import GlobalConfig
 from libs.report_msgs import check_build_msgs
 
@@ -29,7 +30,7 @@ class DoEventsHandler(object):
             event_class = evth_module.get_event_workers()()
             
             try:
-                if self._gc.debug == 2:
+                if self._gc.debug >= C.LOG_DEBUG_DEBUG:
                     self._gc.log.debug("Skip calling :%s with: %s" % (event_name, event_class, ))
                     msg_text = check_build_msgs(host_work.check_work.report) % host_work.check_work.report_msg.msg
                     self._gc.log.debug("Message not sent: %s" % msg_text)
@@ -43,7 +44,7 @@ class DoEventsHandler(object):
                 msg = "Disaster on Event: %s\n%s" % (event_name, tb)
                 self._gc.log.error(msg)
                 
-                if self._gc.debug == 2:
+                if self._gc.debug >= C.LOG_DEBUG_DEBUG:
                     raise
                 
                 #err = O_UnhandledError("DoEventsHandler::%s" % event_name, tb)

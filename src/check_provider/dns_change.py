@@ -2,7 +2,7 @@
 
 from libs.config import GlobalConfig
 from .base_check import BaseCheck
-from libs.objs import O_check_work
+from libs.objs import O_check_work, T_AStr
 
 import libs.constants as C
 
@@ -12,7 +12,7 @@ import dns.resolver as D
 class Check_DnsChange(BaseCheck):
     """"""
     __data_mandatory = (
-                            ("record_type", (str, "")),  
+                            ("record_type", (T_AStr, "")),  
                         )
     __data_optional = (
                             ("check_icmp_count", (int, 4)), 
@@ -41,14 +41,17 @@ class Check_DnsChange(BaseCheck):
         ret_code = C.CHECK_ERROR
         q_ret = []
         try:
-            for x in D.resolve(self._address, host.specific_config.record_type):
-                ret = x.to_text()
-                q_ret.append(ret)
+            for rt in host.specific_config.record_type:
+                for x in D.resolve(self._address, rt):
+                    ret = x.to_text()
+                    q_ret.append((rt, ret))
             
+            q_ret.sort()
             ret_code = C.CHECK_OK
         except Exception as err:
-            msg = (f"Unexpected {err=}, {type(err)=}")
-            q_ret = msg
+            raise err
+            #msg = (f"Unexpected {err=}, {type(err)=}")
+            #q_ret = msg
                 
         return (ret_code, q_ret)
     
