@@ -249,7 +249,7 @@ class Startup(metaclass=Singleton):
             if not os.path.exists(host_details_path):
                 raise FileExistsError("No such file: %s" % host_details_path)
             with open(host_details_path) as host_details_path_f:
-                obj_host.host_details = [line.strip() for line in host_details_path_f.readlines() if line]
+                obj_host.host_details = [line.strip() for line in host_details_path_f.readlines() if line and not line.strip().startswith("#")]
         
         self._gc.hosts_config[host_name] = obj_host
         

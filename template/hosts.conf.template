@@ -14,7 +14,7 @@ check = icmp
 # Default priority
 priority = 1
 
-# section definition is used as hostname for apply the check, unless "load_host_details" parameters is set
+# section definition is used as hostname for apply the check, unless "host_details_path" parameters is set
 [www.google.com]
 # which check apply
 check = http_ok
