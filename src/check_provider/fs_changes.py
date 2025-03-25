@@ -15,6 +15,7 @@ class Check_FsChange(BaseCheck):
                         )
     __data_optional = (
                             ("fs_path", (str, "")), 
+                            ("skip_hidden", (int, True)), 
                             #("", (str, "")), 
                         )
     def __init__(self):
@@ -39,7 +40,7 @@ class Check_FsChange(BaseCheck):
             return (C.CHECK_MSG, "Fs Change, no such file or directory: %s" % self._address)
         
         paths = []
-        # walk thought address
+        # walk thought address (path)
         for root, dirs, files in os.walk(self._address):
             # add root path
             paths.append(root)
@@ -47,10 +48,18 @@ class Check_FsChange(BaseCheck):
             if not files:
                 continue
             # add files to the path's list
-            paths += [os.path.join(root, p) for p in files]
+            paths += [os.path.join(root, p) for p in files if not self._skip_file(p)]
         
         return (C.CHECK_OK, paths)
-
+    
+    def _skip_file(self, file):
+        """Return True if the file has to be skipped"""
+        filename = os.path.basename(file)
+        if self._host.specific_config.skip_hidden and filename.startswith("."):
+            return True
+        else:
+            return False
+    
     def handle_changes(self):
         """Indicate that we are able to handle changes"""
         return True

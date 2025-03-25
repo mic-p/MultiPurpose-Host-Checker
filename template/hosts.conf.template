@@ -51,7 +51,7 @@ event_on_exists = 1
 [/home]
 # verify and execute event on local path tree change
 check = fs_changes
-
+# skip_hidden = True # (default)
 
 [s3:https://s3/repo]
 check = restic_snapshots
