@@ -39,16 +39,16 @@ class Check_FsChange(BaseCheck):
         if not os.path.exists(self._address):
             return (C.CHECK_MSG, "Fs Change, no such file or directory: %s" % self._address)
         
-        paths = []
+        paths = [[], []]
         # walk thought address (path)
         for root, dirs, files in os.walk(self._address):
             # add root path
-            paths.append(root)
+            paths[0].append(root)
             # we want only files, dirs will be present at future run os os.walk
             if not files:
                 continue
             # add files to the path's list
-            paths += [os.path.join(root, p) for p in files if not self._skip_file(p)]
+            paths[1] += [os.path.join(root, p) for p in files if not self._skip_file(p)]
         
         return (C.CHECK_OK, paths)
     
@@ -67,19 +67,31 @@ class Check_FsChange(BaseCheck):
     def format_changes(self, old, new):
         """Format changes"""
         
+        added_d, deleted_d = self._ctr_oldnew(old[0], new[0])
+        added_f, deleted_f = self._ctr_oldnew(old[1], new[1])
+        
+        dta = ""
+        
+        if added_d: dta += "Added Dirs:\n+ %s\n\n" % "\n+ ".join(sorted(added_d))
+        if deleted_d: dta += "Deleted Dirs:\n- %s\n\n" % "\n- ".join(sorted(deleted_d))
+        
+        if added_f: dta += "Added Files:\n+ %s\n\n" % "\n+ ".join(sorted(added_f))
+        if deleted_f: dta += "Deleted Files:\n- %s\n\n" % "\n- ".join(sorted(deleted_f))
+
+        return "Fs Change %s change content:\n%s\n" % (self._address, dta)
+    
+    def _ctr_oldnew(self, old, new):
+        """Control for old and new files, return data splitted"""
         s_old = set()
         s_old.update(old)
         s_new = set()
         s_new.update(new)
-        
+
         deleted = s_old.difference(s_new)
         added = s_new.difference(s_old)
-        
-        dta = "Added:\n+ %s\n\n" % "\n+ ".join(sorted(added))
-        dta += "Deleted:\n- %s" % "\n- ".join(sorted(deleted))
-        
-        return "Fs Change %s change content:\n%s\n" % (self._address, dta)
-        
+
+        return deleted, added
+
     def get_data_mandatory(self):
         """"""
         return self.__data_mandatory

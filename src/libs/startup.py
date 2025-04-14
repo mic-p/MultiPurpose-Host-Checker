@@ -93,6 +93,7 @@ class Startup(metaclass=Singleton):
         self._gc.path_data = load_data_opt(config, "global", "path_data", str, "")
         self._gc.conf_mphc.execute_cmd_event_error = load_data_opt(config, "global", "execute_cmd_event_error", str, "")
         self._gc.conf_mphc.execute_cmd_global_error = load_data_opt(config, "global", "execute_cmd_global_error", str, "") 
+        self._gc.conf_mphc.n_checks_simultaneously = load_data_opt(config, "global", "n_checks_simultaneously", int, 1) 
         
         # load configuration for logger, so the code can use it
         _logger = load_data_opt(config, "global",  "logger", str)
@@ -121,7 +122,9 @@ class Startup(metaclass=Singleton):
         self._load_config_hosts()
 
         if not  os.path.isdir(self._gc.path_data):
-            self._raise_err_exit("Path %s set into configuration is not a valid directory" % self._gc.path_data, 3)
+            msg = "Path %s set into configuration is not a valid directory" % self._gc.path_data
+            self._gc.log.error(msg)
+            self._raise_err_exit(msg, 3)
 
     def _load_event_handlers(self):
         """Load  checks from configuration"""

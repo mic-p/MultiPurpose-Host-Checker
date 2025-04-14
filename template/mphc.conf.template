@@ -1,8 +1,12 @@
 [global]
 # default generic configuration section
+
 # debug can be 0|1 (no, yes, false, true) | 2
 # 2 is used only by the develop process: not send emails and raise exceptions on errors
 debug = 1
+
+# how many checks simultaneously to run. if the value is more than 1, MPHC will use threads
+n_checks_simultaneously = 1
 
 # MPHC cache path for save data
 path_data = /tmp/mphc
