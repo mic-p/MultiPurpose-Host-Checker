@@ -90,7 +90,7 @@ class Check_FsChange(BaseCheck):
         deleted = s_old.difference(s_new)
         added = s_new.difference(s_old)
 
-        return deleted, added
+        return added, deleted
 
     def get_data_mandatory(self):
         """"""
