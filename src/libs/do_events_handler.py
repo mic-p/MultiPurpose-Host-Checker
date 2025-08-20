@@ -32,7 +32,7 @@ class DoEventsHandler(object):
             try:
                 if self._gc.debug >= C.LOG_DEBUG_DEBUG:
                     self._gc.log.debug("Skip calling :%s with: %s" % (event_name, event_class, ))
-                    msg_text = check_build_msgs(host_work.check_work.report) % host_work.check_work.report_msg.msg
+                    msg_text = check_build_msgs(host_work.check_work)
                     self._gc.log.debug("Message not sent: %s" % msg_text)
                 else:
                     event_class.do_event(host_work)

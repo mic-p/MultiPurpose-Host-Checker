@@ -224,6 +224,10 @@ class O_UnhandledError(object):
         self.code_position = code_position
         self.msg = msg
     
+    def format_error(self):
+        """return formatted test of error"""
+        return "Work state: %s\nError: %s" % (self.code_position, self.msg)
+    
     def __repr__(self):
         """"""
         return "<O_UnhandledError>: %s" % self.msg

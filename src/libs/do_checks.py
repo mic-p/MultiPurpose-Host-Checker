@@ -69,7 +69,7 @@ class DoChecks(object):
                 
                 # we had a problem somewhere with the check that raise an error, save it for future report 
                 if ret_code == C.CHECK_ERROR:
-                    check_class.check_work.report_msg = O_UnhandledError("DoChecks::%s::%s" % (check_name, address), msg_ret)
+                    check_class.check_work.report_msg = O_UnhandledError("DoChecks - Check: %s - Host: %s" % (check_name, address), msg_ret)
                     check_class.check_work.report = C.CHECK_ERROR
                     self._gc.log.error(msg_ret)
                 elif ret_code == C.CHECK_MSG:

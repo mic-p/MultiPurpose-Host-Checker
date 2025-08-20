@@ -41,10 +41,8 @@ class Evt_EmailSmtp(object):
             msg['message-id'] = utils.make_msgid(domain=domain)
             
             # assemble text message
-            msg_text = check_build_msgs(host_work.check_work.report)
-            
-            msg_text = msg_text % host_work.check_work.report_msg.msg
-            
+            msg_text = check_build_msgs(host_work.check_work)
+                        
             msg.set_content(msg_text)
             msg['subject'] = smtp_config.email_subject
             msg['to'] = smtp_config.address_to

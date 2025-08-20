@@ -28,7 +28,7 @@ class ExecuteCmd(object):
             if timeout_err:
                 msg = "Timeout on execute: %s" % err
             else:
-                msg = "Exit code: %s. Message error: %s" % (p.returncode, err)
+                msg = "Exit code: %s. Output error: %s" % (p.returncode, ("\n%s\n%s" % (out, err)))
             return (C.CHECK_ERROR, msg)
         else:
             return (C.CHECK_OK, out if ret_data else "")

@@ -39,6 +39,7 @@ class Check_FsChange(BaseCheck):
         if not os.path.exists(self._address):
             return (C.CHECK_MSG, "Fs Change, no such file or directory: %s" % self._address)
         
+        # dirs, files
         paths = [[], []]
         # walk thought address (path)
         for root, dirs, files in os.walk(self._address):

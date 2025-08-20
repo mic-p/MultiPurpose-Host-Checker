@@ -87,10 +87,9 @@ class Evt_EmailGmail(object):
         to = self._gmail_config.email_to
         subject = self._gmail_config.email_subject
         host_work =  self._host_work
-        # assemble text message
         
-        msg_text = check_build_msgs(host_work.check_work.report)
-        msg_text = msg_text % host_work.check_work.report_msg.msg
+        # assemble text message
+        msg_text = check_build_msgs(host_work.check_work)
         
         creds = self._cred
 
