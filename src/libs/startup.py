@@ -122,9 +122,17 @@ class Startup(metaclass=Singleton):
         self._load_config_hosts()
 
         if not  os.path.isdir(self._gc.path_data):
-            msg = "Path %s set into configuration is not a valid directory" % self._gc.path_data
+            msg = "Error: Path %s set into configuration is not a valid directory" % self._gc.path_data
             self._gc.log.error(msg)
             self._raise_err_exit(msg, 3)
+        
+        if self._gc.host_check_startup:
+            # check if the asked host(s) really exists
+            for h in self._gc.host_check_startup:
+                if not h in self._gc.hosts_config:
+                    msg = "Error: Host '%s' not present into configuration hosts:\n\n %s" % (h,  "\n ".join([x for x in self._gc.hosts_config]))
+                    self._gc.log.error(msg)
+                    self._raise_err_exit(msg, 4)
 
     def _load_event_handlers(self):
         """Load  checks from configuration"""
@@ -304,6 +312,7 @@ class Startup(metaclass=Singleton):
         parser = argparse.ArgumentParser()
         parser.add_argument("-H", "--hosts", help="File where load hosts", type=str)
         parser.add_argument("-c", "--config", help="Configuration file", type=str)
+        parser.add_argument("-n", "--host_check", help="Hostname(s) to check. Split them by ','", type=str)
         
         # scan args
         args = parser.parse_args()
@@ -318,5 +327,8 @@ class Startup(metaclass=Singleton):
         # check if file exists
         if not (os.path.exists(f1) and os.path.exists(f2)):
             self._raise_err_parse(parser, "No such file: %s or %s" % (f1, f2))
-
+        
+        # load host to check
+        self._gc.host_check_startup = args.host_check.split(",") if args.host_check else []
+        
         return args

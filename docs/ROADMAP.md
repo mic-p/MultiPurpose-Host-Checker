@@ -1,5 +1,5 @@
 # Roadmap
-## Todo for v.1 (q2 2025)
+## Todo for v.1 (q4 2025)
 - End wiki
 - ~~End checks~~:
 	- ~~dns_change~~ -> Done
@@ -11,6 +11,7 @@
 
 - Enable multiple checks and ~~multiple events handler for single host~~
 - ~~Enable multiple records for dns_change for single check~~
+- ~~Single host check via command line (-n, --host_check)~~
 
 ## Todo for v.2 (not planned)
 - New checks:

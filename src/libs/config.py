@@ -35,6 +35,9 @@ class GlobalConfig(metaclass=Singleton):
 
         self.log = None
         self.startup_done = False
+        
+        # single host to check, set at startup time
+        self.host_check_startup = []
 
     def __repr__(self):
         return "<GlobalConfig>%s; %s; %s" % (self.conf_log, self.conf_event_handler, self.conf_mphc)

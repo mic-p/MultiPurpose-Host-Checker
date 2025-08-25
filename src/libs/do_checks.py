@@ -38,10 +38,16 @@ class DoChecks(object):
                 self._do_work(host)
     
     def _do_work(self, host):
-        """"""
+        """Do the work for the host passed"""
         # configuration object
         obj_host = self._gc.hosts_config[host]
         check_name = obj_host.check
+        
+        if self._gc.host_check_startup:
+            # check only the host(s) requested at startup
+            if not host in self._gc.host_check_startup:
+                self._gc.log.debug("Host skipped: %s. We want here only: %s" % (host, self._gc.host_check_startup))
+                return
         
         # get the specific class
         cls = check_handlers.get_check_class(check_name).get_check_workers()

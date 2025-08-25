@@ -1,5 +1,5 @@
 # MultiPurpose-Host-Checker (MPHC)
-*MPHC* is a program for monitor and check your Hosts in a MultiPurpose manner.  
+*MPHC* is a program for monitor and Check your Hosts in a Multi Purpose manner.  
 *MPHC* helps you to control the behavior and the state of your hosts. It's up to you choose what and when *MPHC* will check your hosts.
 
 *MPHC* programs was developed with a simple rule in mind: user should take no more than 4 (four) minutes to install and use it!
@@ -8,9 +8,9 @@
 - Check your hosts and notify you if anything changes or an event occurs.
 - Very simple configuration with .ini style files
 - Works on Linux and Windows (and all the other platforms that runs Python)
-- Usable with cron (Linux) or Task Scheduler (Windows)
+- Usable with cron (*nix) or Task Scheduler (Windows)
 - Extendible: do you know Python? You can write your checks and event handler in minutes without change the *MPHC* core
-- Production ready. *MPHC* was heavy tested for month in production for monitor company and internet hosts
+- Production ready. *MPHC* is heavy tested for months in production environments to monitor company and internet hosts
 
 ## Checks avaiables
 - icmp: check with *ping* program the reachability of a host
@@ -24,7 +24,7 @@
 
 ## Event handler
 - email_gmail: Send email with gmail. *MPHC* handle correctly OAuth2 protocol. See GMAIL readme for more details
-- email_smtp: Send email. See the documentations for more details
+- email_smtp: Send email via smtp protocol. See the documentations for more details
 - execute_cmd: Execute a command. See the documentations for more details
 
 ## Installation
@@ -34,7 +34,7 @@ pip install -r requirements.txt
 ```
 - download the .zip|.tar.gz file
 - extract somewhere (/opt/mphc)
-- copy configuration templates file from /opt/mphc/template to somewhere (/etc/mphc)
+- copy configuration templates file from /opt/mphc template to somewhere (/etc/mphc)
 - edit:
 	+ mphc.conf
 	+ hosts.conf
@@ -52,6 +52,11 @@ $ chmod +rx /opt/mphc/main.py
 $ ln -s /opt/mphc/main.py /usr/local/bin/mphc
 
 $ mphc -c /etc/mphc/mphc.conf -H /etc/mphc/hosts.conf
+or
+$ mphc -c /etc/mphc/mphc.conf -H /etc/mphc/hosts.conf -n host1_to_check,host2_to_check
+
+# and for help
+$ mphc -h
 ```
 
 *That's all!*
@@ -64,7 +69,7 @@ $ mphc -c /etc/mphc/mphc.conf -H /etc/mphc/hosts.conf
 - See wiki pages for more
 
 ## Why *MPHC* ?
+- *MPHC* is a system that checks your hosts with simplicity and alerts you when something happen
 - *MPHC* is not a complete monitoring system like Zabbix, Nagios or Solarwinds. No dashboards, graphs, trends, statistics are provided.
-- *MPHC* is just a software that checks your hosts with simplicity and alerts you when something happen
 
 ## Todo: see ROADMAP

@@ -9,7 +9,7 @@ def check_build_msgs(check_work):
     elif err == C.CHECK_MSG:
         msg_text = "MPHC information reporting\n--\n%s" % check_work.report_msg.msg
     elif err == C.CHECK_DISASTER:
-        msg_text = "MPHC disaster\n--\n%s"
+        msg_text = "MPHC disaster\n--\n%s" % check_work.report_msg.format_error()
     else:
         raise ValueError("Why here? %s" % err)
     
