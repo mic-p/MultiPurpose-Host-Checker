@@ -20,9 +20,6 @@ continue_on_check_problem = True
 # $r -> return code from check
 # $f -> random path to a file that contains the information that the check|event returns to explain the error. It's up to the program called delete it
 
-# If error on event occurred, execute a command at the end. See above for variables
-execute_cmd_event_error = echo $c $h $r $f > /tmp/mphc-execute_err.txt
-
 # If program error occurred (checks or event-handler raise unknown expection), execute a single command at the end of the work. See above for variables
 execute_cmd_global_error = /usr/bin/true $c $h $r $f
 

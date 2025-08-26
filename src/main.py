@@ -32,9 +32,12 @@ class Work():
         
         end_work = do_end_work.DoEndWork()
         ret_code = end_work.DoEndWork()
+        self._do_check_exit(ret_code)
         
-        if ret_code == C.CHECK_ERROR:
-            msg_exit = "Some errors presents, exit 1"
+    def _do_check_exit(self, ret_code):
+        """End the checks and exit"""
+        if ret_code == C.CHECK_DISASTER:
+            msg_exit = "Some disaster errors presents. Maybe bug. See logs or enable execute_cmd_global_error. Exit 1"
             err_exit = 1
             f = self._gc.log.error
         else:
@@ -43,9 +46,9 @@ class Work():
             err_exit = 0
         
         f(msg_exit)
+        if err_exit:
+            print(msg_exit)
         sys.exit(err_exit)
-        
-        
         
 
 

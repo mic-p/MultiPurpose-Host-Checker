@@ -119,6 +119,5 @@ class DoChecks(object):
                     chk_rep = O_CheckReport(check_class.format_changes(old_data, msg_ret))
                     check_class.check_work.report = C.CHECK_MSG
                     check_class.check_work.report_msg = chk_rep
-                    #self._gc.global_messages.append(chk_rep)
                         
 

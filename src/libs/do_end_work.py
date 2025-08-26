@@ -1,10 +1,10 @@
 # -*- coding: UTF-8 -*-
 
 import libs.local_config as local_config
-import libs.objs as O
 import libs.constants as C
 
 from libs.config import GlobalConfig
+from event_handler import execute_cmd
 
 
 class DoEndWork(object):
@@ -16,26 +16,26 @@ class DoEndWork(object):
         self._gc = GlobalConfig()
         
     def DoEndWork(self):
-        """"""
-        
+        """Do the ending works before exit"""
         # save data
         self._save_local()
         
-        check_report = self._gc.checks_done.get_check_report()
+        # verify if there is some errors with the checks
+        check_report = self._gc.checks_done.get_check_report_disaster()
         if not check_report:
             return C.CHECK_OK
         
-        err_presents = C.CHECK_OK
-        for msgs in check_report:
-            if isinstance(msgs, O.O_CheckReport):
-                pass
-            elif isinstance(msgs, O.O_UnhandledError):
-                msg = "Disaster happens on: %s\n" % msgs.code_position
-                msg += "".join(msgs.msg)
-                self._gc.log.error(msg)
-                err_presents = C.CHECK_ERROR
+        err_ret = C.CHECK_DISASTER
+        # return if there is no need to call external command on global error
+        if not self._gc.execute_cmd_global_error:
+            return err_ret
         
-        return err_presents
+        for host_work in check_report:
+            # and call the execute_cmd_global_error for every error present
+            c = execute_cmd.Evt_ExecuteCmd()
+            c.do_event(host_work)
+        
+        return err_ret
 
     def _save_local(self):
         """"""

@@ -46,7 +46,7 @@ class Evt_ExecuteCmd(object):
                 os.close(fd)
             cmd_exe = cmd_exe.replace("$f", path)
         
-        self._gc.log.debug("Execute event command: %s"% (cmd_exe, ))
+        self._gc.log.debug("Execute command: %s"% (cmd_exe, ))
         errcode, msg = ExecuteCmd().do_execute(cmd_exe, shell=True, ret_data=True)
         
         return (errcode, msg)

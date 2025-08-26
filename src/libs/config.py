@@ -15,7 +15,6 @@ class GlobalConfig(metaclass=Singleton):
         self.conf_mphc = O_conf_mphc()
         
         # commands to execute on some events error. see @doc for more info
-        self.execute_cmd_event_error = ""
         self.execute_cmd_global_error = ""
         
         # event handlers list

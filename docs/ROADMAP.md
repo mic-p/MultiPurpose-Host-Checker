@@ -13,6 +13,8 @@
 - ~~Single host check via command line (-n, --host_check)~~
 - ~~Enable the cmd_execute event handler~~
 - ~~Debug overwrite via command line~~
+- ~~Handle execute_cmd_global_error~~
+- host.conf: handle check_no_less_than
 
 ## Todo for v.2 (not planned)
 - Enable multiple checks and multiple events handler for single host

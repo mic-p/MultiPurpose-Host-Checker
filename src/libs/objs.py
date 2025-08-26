@@ -150,6 +150,10 @@ class O_checks_done(object):
     def get_check_report(self):
         """"""
         return [host for host in self._checks_done if host.check_work.report]
+    
+    def get_check_report_disaster(self):
+        """"""
+        return [host for host in self._checks_done if host.check_work.report == C.CHECK_DISASTER]
 
 class O_check_work():
     """Object that represent a working check"""
