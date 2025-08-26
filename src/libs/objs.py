@@ -134,7 +134,7 @@ class O_conf_event_handler_cmd(_BaseObj):
         return self.__data_optional
 
     def __repr__(self):
-        return "<O_conf_event_handler_gmail>gmail_user: %s" % (self.gmail_user, )
+        return "<O_conf_event_handler_cmd>Execute_cmd: %s" % (self.execute_cmd, )
 
 class O_checks_done(object):
     """class that represent the events to handle.
@@ -178,6 +178,7 @@ class O_conf_host(_BaseObj):
                             ("check_no_less_than", (str, "")), 
                             ("host_details_path", (str, "")), 
                             ("priority", (int, 0)), 
+                            ("host_enable", (int, 1)),
                         )
     def __init__(self):
         """"""
@@ -188,9 +189,7 @@ class O_conf_host(_BaseObj):
         self.host_details = []
         
         self.specific_config = O_conf_specific_host()
-        
-        self.check_toreport = False
-        
+                
     def get_data_mandatory(self):
         """"""
         return self.__data_mandatory
@@ -200,7 +199,7 @@ class O_conf_host(_BaseObj):
         return self.__data_optional
 
     def __repr__(self):
-        return "<O_conf_host>check: %s, on_event: %s" % (self.check, self.on_event)
+        return "<O_conf_host>check: %s, on_event: %s, details: %s" % (self.check, self.on_event, self.specific_config, )
 
 class O_conf_host_detail(object):
     """Host configuration conteiner"""
@@ -254,7 +253,20 @@ class O_LocalConfig(object):
         
         # saved
         self.check_data = dict()
-    
+
+class O_ExecuteCmd_Error(object):
+    """Class that represent an ExecuteCmd Error"""
+    def __init__(self, returncode, out, err, msg=""):
+        self.returncode = returncode
+        self.out = out
+        self.err = err
+        self.msg = ""
+        
+    def __repr__(self):
+        if self.msg:
+            return self.msg
+        else:
+            return "Exit code: %s. Output error: %s" % (self.returncode, ("\n%s\n%s" % (self.out, self.err)))
 
 # Class that represent the types loaded from config
 class T_AStr(object): pass

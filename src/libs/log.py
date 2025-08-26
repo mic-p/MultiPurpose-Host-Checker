@@ -74,7 +74,8 @@ class Logging(metaclass=Singleton):
             f_log = self._log.error
         else:
             f_log = self._log.info
-        f_log(v)
+        # write to the log. Replacing "\n" with ";" for better readble
+        f_log(str(v).replace("\n", ";"))
         
         #self._log.handlers[0].flush()
 

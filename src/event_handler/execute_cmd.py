@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
+import os
+import tempfile
+
 from libs.utils_popen import ExecuteCmd
 from libs.config import GlobalConfig
 
@@ -22,9 +25,31 @@ class Evt_ExecuteCmd(object):
             # $c -> check|event name
             # $h -> host (valid only for events, null otherwise)
             # $r -> return code from check
-            # $f -> random path to a file that contains the information that the check|event returns to explain the error. It's up to the program delete it
+            # $f -> random path to a file that contains the information that the check|event returns to explain the error, if any. It's up to the program delete it
         """
-        ExecuteCmd().do_execute
+        
+        cmd_exe = cmd_execute_config.execute_cmd[:]
+        
+        for replaceable, value  in (
+                                            ("$c", event_name),
+                                            ("$h", host_name),
+                                            ("$r", host_work.check_work.report),
+                                        ):
+                cmd_exe = cmd_exe.replace(replaceable, str(value))
+        
+        if "$f" in cmd_exe:
+            fd, path = tempfile.mkstemp(prefix="MPHC_")
+            if host_work.check_work.report:
+                with os.fdopen(fd, 'w') as f:
+                    f.write('%s\n' % host_work.check_work.report_msg)
+            else:
+                os.close(fd)
+            cmd_exe = cmd_exe.replace("$f", path)
+        
+        self._gc.log.debug("Execute event command: %s"% (cmd_exe, ))
+        errcode, msg = ExecuteCmd().do_execute(cmd_exe, shell=True, ret_data=True)
+        
+        return (errcode, msg)
         
 
 def get_event_workers():

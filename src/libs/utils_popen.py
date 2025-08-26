@@ -2,8 +2,10 @@
 # -*- coding: UTF-8 -*-
 
 import subprocess
-from libs.config import GlobalConfig
+
 import libs.constants as C
+from libs.config import GlobalConfig
+from libs.objs import O_ExecuteCmd_Error 
 
 class ExecuteCmd(object):
     """"""
@@ -26,9 +28,9 @@ class ExecuteCmd(object):
             
         if p.returncode or timeout_err:
             if timeout_err:
-                msg = "Timeout on execute: %s" % err
+                OErr = O_ExecuteCmd_Error(p.returncode, out, err, "Timeout on execute:")
             else:
-                msg = "Exit code: %s. Output error: %s" % (p.returncode, ("\n%s\n%s" % (out, err)))
-            return (C.CHECK_ERROR, msg)
+                OErr = O_ExecuteCmd_Error(p.returncode, out, err,  msg="")
+            return (C.CHECK_ERROR, OErr)
         else:
             return (C.CHECK_OK, out if ret_data else "")

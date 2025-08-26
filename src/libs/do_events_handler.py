@@ -22,7 +22,7 @@ class DoEventsHandler(object):
             # configuration object
             #check_name = obj_host.check
             
-            # look for the event name (on_event is the name of the event to call when errors occured. it is the option in the config file)
+            # look for the event name (on_event is the name of the event to call when errors occured)
             event_name = host_work.check_work.host.on_event
             
             # retrieve the corresponding module for on_event

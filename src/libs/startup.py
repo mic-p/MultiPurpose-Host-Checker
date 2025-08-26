@@ -88,7 +88,7 @@ class Startup(metaclass=Singleton):
         
         #load global MPHC configuration
         # config, section, opt_name, ftype, fallback 
-        self._gc.debug = load_data_opt(config, "global", "debug", int, 0)
+        self._gc.debug = load_data_opt(config, "global", "debug", int, 0) if not self._startup_args.debug else self._startup_args.debug
         self._gc.conf_mphc.continue_on_check_problem = load_data_opt(config, "global", "continue_on_check_problem", bool, 1)
         self._gc.path_data = load_data_opt(config, "global", "path_data", str, "")
         self._gc.conf_mphc.execute_cmd_event_error = load_data_opt(config, "global", "execute_cmd_event_error", str, "")
@@ -313,6 +313,7 @@ class Startup(metaclass=Singleton):
         parser.add_argument("-H", "--hosts", help="File where load hosts", type=str)
         parser.add_argument("-c", "--config", help="Configuration file", type=str)
         parser.add_argument("-n", "--host_check", help="Hostname(s) to check. Split them by ','", type=str)
+        parser.add_argument("-D", "--debug", help="Force development debug, overwritting the configuration value", type=int,  default=0)
         
         # scan args
         args = parser.parse_args()

@@ -2,7 +2,7 @@
 # default generic configuration section
 
 # debug can be 0|1 (no, yes, false, true) | 2
-# 2 is used only by the develop process: not send emails and raise exceptions on errors
+# 2 is used only by the develop process: not send emails and raise exceptions when errors occurs
 debug = 1
 
 # how many checks simultaneously to run. if the value is more than 1, MPHC will use threads
@@ -18,12 +18,12 @@ continue_on_check_problem = True
 # $c -> check|event name
 # $h -> host (valid only for events, null otherwise)
 # $r -> return code from check
-# $f -> random path to a file that contains the information that the check|event returns to explain the error. It's up to the program delete it
+# $f -> random path to a file that contains the information that the check|event returns to explain the error. It's up to the program called delete it
 
-# If error on event occurred, execute a command at the end. See eventhandler_cmd for variabe
+# If error on event occurred, execute a command at the end. See above for variables
 execute_cmd_event_error = echo $c $h $r $f > /tmp/mphc-execute_err.txt
 
-# If program error occurred (check or eventhandler raise unknown expection), execute a single command at the end of the work
+# If program error occurred (checks or event-handler raise unknown expection), execute a single command at the end of the work. See above for variables
 execute_cmd_global_error = /usr/bin/true $c $h $r $f
 
 # logger can be: syslog, file or 0|no|false|off (case insensitive)

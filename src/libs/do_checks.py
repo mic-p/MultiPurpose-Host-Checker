@@ -49,6 +49,11 @@ class DoChecks(object):
                 self._gc.log.debug("Host skipped: %s. We want here only: %s" % (host, self._gc.host_check_startup))
                 return
         
+        # check if the host is enable, otherwise skip it
+        if not obj_host.specific_config.host_enable:
+            self._gc.log.debug("Host %s disable. Skipped" % (host, ))
+            return
+        
         # get the specific class
         cls = check_handlers.get_check_class(check_name).get_check_workers()
         check_class = cls()
@@ -77,7 +82,7 @@ class DoChecks(object):
                 if ret_code == C.CHECK_ERROR:
                     check_class.check_work.report_msg = O_UnhandledError("DoChecks - Check: %s - Host: %s" % (check_name, address), msg_ret)
                     check_class.check_work.report = C.CHECK_ERROR
-                    self._gc.log.error(msg_ret)
+                    self._gc.log.error(check_class.check_work.report_msg)
                 elif ret_code == C.CHECK_MSG:
                     check_class.check_work.report_msg = O_CheckReport(msg_ret)
                     check_class.check_work.report = C.CHECK_MSG
@@ -94,7 +99,7 @@ class DoChecks(object):
                     raise
                                     
             if ret_code and not self._gc.conf_mphc.continue_on_check_problem:
-                self._gc.log.debug("Error happens on %s, stop checks!" % check_name)
+                self._gc.log.debug("Error happens on %s and continue_on_check_problem set True. Stop checks!" % check_name)
                 break
             
             # verify if the check need to handle changes
