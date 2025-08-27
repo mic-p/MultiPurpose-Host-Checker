@@ -30,3 +30,11 @@ class BaseCheck(object):
     def get_data_optional(self):
         """Return the optional configuration data need by the check"""
         raise NotImplementedError
+
+    def set_uuid(self, work_uuid):
+        """Set our unique work uuid"""
+        self.__uuid = work_uuid
+        
+    def debug_log(self, msg):
+        """"""
+        self._gc.log.debug("%s-%s"% (self.__uuid,  msg, ))

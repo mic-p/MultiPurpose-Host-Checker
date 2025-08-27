@@ -57,4 +57,4 @@ address_to = email@email.tld
 [evth_cmd]
 # cmd part. execute a cmd when event happends
 type = cmd
-execute_cmd = /usr/bin/true $c $h $f
+execute_cmd = /usr/bin/true $c $h $r $f

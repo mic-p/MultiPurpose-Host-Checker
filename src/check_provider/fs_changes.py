@@ -34,7 +34,7 @@ class Check_FsChange(BaseCheck):
         self._address = address
         self._host = host
         self.check_work.host = host
-        self._gc.log.debug("Start Fs Change check for: %s"% (host.name, ))
+        self.debug_log("Start Fs Change check for: %s"% (host.name, ))
         
         if not os.path.exists(self._address):
             return (C.CHECK_MSG, "Fs Change, no such file or directory: %s" % self._address)

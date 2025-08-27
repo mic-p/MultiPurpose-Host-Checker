@@ -55,7 +55,7 @@ class Check_Icmp(BaseCheck):
         self._host = host
         self.check_work.host = host
         
-        self._gc.log.debug("Start ICMP check for: %s"% (host.name, ))
+        self.debug_log("Start ICMP check for: %s"% (host.name, ))
         
         if HAVE_ICMPLIB:
             return self._do_icmp_pythonic()
@@ -88,7 +88,7 @@ class Check_Icmp(BaseCheck):
 
         cmd_exe = ping_cmd +[self._address]
         
-        self._gc.log.debug("Execute ICMP command: %s"% (cmd_exe, ))
+        self.debug_log("Execute ICMP command: %s"% (cmd_exe, ))
         
         timeout_max = self._host.specific_config.interval * self._host.specific_config.timeout + 5
         errcode, msg = ExecuteCmd().do_execute(cmd_exe, timeout_max)

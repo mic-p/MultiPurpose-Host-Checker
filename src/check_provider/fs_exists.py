@@ -31,7 +31,7 @@ class Check_FsExists(BaseCheck):
         self._address = address
         self._host = host
         self.check_work.host = host
-        self._gc.log.debug("Start FS Exists check for: %s"% (host.name, ))
+        self.debug_log("Start FS Exists check for: %s"% (host.name, ))
         
         exists = os.path.exists(address)
         if self._host.specific_config.event_on_exists and exists:

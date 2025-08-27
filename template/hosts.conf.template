@@ -14,6 +14,9 @@ check = icmp
 # Default priority
 priority = 1
 
+# Enable or disable all the hosts. If the value is 0, host aren't loaded and checked. Value can be overwritten in every host configuration
+host_enable = 0
+
 # section definition is used as hostname for apply the check, unless "host_details_path" parameters is set
 [www.google.com]
 # which check apply

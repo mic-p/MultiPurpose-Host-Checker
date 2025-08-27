@@ -255,8 +255,11 @@ class O_LocalConfig(object):
         # seconds from the epoch of previous run
         self.previous_dt = 0
         
-        # saved
+        # data where every check can save data for next use
         self.check_data = dict()
+        
+        # data where is stored the last run of every check
+        self.data_last_run = dict()
 
 class O_ExecuteCmd_Error(object):
     """Class that represent an ExecuteCmd Error"""

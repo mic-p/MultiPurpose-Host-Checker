@@ -75,11 +75,8 @@ class Startup(metaclass=Singleton):
         
         # load saved data on fs
         lc = local_config.LocalConfig()
-        self._gc.local_config.check_data, self._gc.local_config.previous_dt = lc.load()
-        
-        for check_name in self._gc.hosts_config:
-            self._gc.local_config.check_data.setdefault(check_name, None)
-    
+        self._gc.local_config.check_data, self._gc.local_config.data_last_run, self._gc.local_config.previous_dt = lc.load()
+                    
     def _load_conf_ini_global(self):
         """"""
         #start to load the configuration from

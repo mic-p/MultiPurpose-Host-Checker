@@ -36,7 +36,7 @@ class Check_DnsChange(BaseCheck):
         self._host = host
         self.check_work.host = host
         
-        self._gc.log.debug("Start DNS Change check for: %s"% (address, ))
+        self.debug_log("Start DNS Change check for: %s"% (address, ))
 
         ret_code = C.CHECK_ERROR
         q_ret = []

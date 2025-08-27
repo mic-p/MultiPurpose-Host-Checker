@@ -32,7 +32,7 @@ class Check_HttpOk(BaseCheck):
         self._address = address
         self._host = host
         self.check_work.host = host
-        self._gc.log.debug("Start HttpOk check for: %s"% (host.name, ))
+        self.debug_log("Start HttpOk check for: %s"% (host.name, ))
     
         ret_code = C.CHECK_ERROR
         
@@ -70,7 +70,7 @@ class Check_HttpOk(BaseCheck):
                     # retrieve all the server headers
                     k, v = item
                     q_ret+= "%s: %s\n" % (k, v)
-            self._gc.log.debug("HttpOk check. Host: (%s, %s). Returns: %s" % (host, address, q_ret, ))
+            self.debug_log("HttpOk check. Host: %s. Returns: %s" % (address, q_ret, ))
                 
         except Exception as err:
             raise err

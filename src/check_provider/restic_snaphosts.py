@@ -45,7 +45,7 @@ class Check_Restic_snaphosts(BaseCheck):
         self._address = address
         self._host = host
         self.check_work.host = host
-        self._gc.log.debug("Start Restic snapshots check for: %s"% (host.name, ))
+        self.debug_log("Start Restic snapshots check for: %s"% (host.name, ))
         
         # create the command path
         cmd_exe = [host.specific_config.restic_exe, "-r", 
@@ -56,7 +56,7 @@ class Check_Restic_snaphosts(BaseCheck):
         if host.specific_config.restic_tags:
             cmd_exe += ["--tag", host.specific_config.restic_tags]
         
-        self._gc.log.debug("Execute Restic command: %s"% (cmd_exe, ))
+        self.debug_log("Execute Restic command: %s"% (cmd_exe, ))
         
         # create the env
         # if there is a specific env load, use it
@@ -95,7 +95,7 @@ class Check_Restic_snaphosts(BaseCheck):
         
         # if not enough, return a message
         if len(snap_after) >= host.specific_config.min_snapshots:
-            self._gc.log.debug("Restic snapshots. Enough snap: %s" % len(snap_after))
+            self.debug_log("Restic snapshots. Enough snap: %s" % len(snap_after))
             return (C.CHECK_OK, "")
         else:
             return (C.CHECK_MSG, "Not enough snapshots for %s: %s, we need: %s in period: %s" % (

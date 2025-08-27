@@ -32,6 +32,7 @@ class DoEndWork(object):
         
         for host_work in check_report:
             # and call the execute_cmd_global_error for every error present
+            self._gc.log("Found error to report, execute execute_cmd_global_error")
             c = execute_cmd.Evt_ExecuteCmd()
             c.do_event(host_work)
         
@@ -40,5 +41,5 @@ class DoEndWork(object):
     def _save_local(self):
         """"""
         lc = local_config.LocalConfig()
-        lc.save(self._gc.local_config.check_data)
+        lc.save(self._gc.local_config.check_data, self._gc.local_config.data_last_run)
         
