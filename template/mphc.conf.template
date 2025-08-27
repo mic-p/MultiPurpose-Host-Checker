@@ -1,4 +1,4 @@
-[global]
+[DEFAULT]
 # default generic configuration section
 
 # debug can be 0|1 (no, yes, false, true) | 2

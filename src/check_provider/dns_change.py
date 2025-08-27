@@ -15,7 +15,6 @@ class Check_DnsChange(BaseCheck):
                             ("record_type", (T_AStr, "")),  
                         )
     __data_optional = (
-                            ("check_icmp_count", (int, 4)), 
                             #("", (str, "")), 
                         )
     def __init__(self):

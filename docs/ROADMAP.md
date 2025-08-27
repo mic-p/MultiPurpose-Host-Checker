@@ -1,6 +1,6 @@
 # Roadmap
 ## Todo for v.1 (q4 2025)
-- End wiki
+- ~~End wiki~~
 - ~~End checks~~:
 	- ~~dns_change~~ -> Done
 	- ~~http_ok~~ -> Done

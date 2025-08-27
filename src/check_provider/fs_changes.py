@@ -14,7 +14,7 @@ class Check_FsChange(BaseCheck):
                             #("", (str, "")),  
                         )
     __data_optional = (
-                            ("fs_path", (str, "")), 
+                            #("fs_path", (str, "")), 
                             ("skip_hidden", (int, True)), 
                             #("", (str, "")), 
                         )
