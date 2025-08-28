@@ -12,7 +12,7 @@
 - Extendible: do you know Python? You can write your checks and event handler in minutes without change the *MPHC* core
 - Production ready. *MPHC* is heavy tested for months in production environments to monitor company and internet hosts
 
-## Checks avaiables
+## Checks avaiables (see @wiki for all the information)
 - icmp: check with *ping* program the reachability of a host
 - http_diff: check if one or more webpages is changed from last check
 - http_ok: check if a webserver reply with status code 200
@@ -22,7 +22,7 @@
 - restic_snapshots: verify if there is enought snapshots in the time period specified
 - *other soon stay tuned or open a feature request*
 
-## Event handler
+## Event handler (see @wiki for all the information)
 - email_gmail: Send email with gmail. *MPHC* handle correctly OAuth2 protocol. See GMAIL readme for more details
 - email_smtp: Send email via smtp protocol. See the documentations for more details
 - execute_cmd: Execute a command. See the documentations for more details
@@ -30,7 +30,7 @@
 ## Installation
 - See wiki pages for all the informations
 
-## Documentation
+## Documentation (see @wiki for all the information)
 - *MPHC* has only two configuration file:
 	+ config.conf
 	+ hosts.conf
