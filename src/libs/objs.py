@@ -55,7 +55,7 @@ class O_conf_event_handler_smtp(_BaseObj):
                     ("address_to", (str, "")),
                 )
     __data_optional =  (
-                    ("smtp_host", (str, "")),
+                    ("smtp_host", (str, "localhost")),
                     ("smtp_port", (int, 25)),
                     ("smtp_use_tls", (bool, False)),
                     ("smtp_user", (str, "")),
@@ -65,7 +65,7 @@ class O_conf_event_handler_smtp(_BaseObj):
     def __init__(self):
         super(O_conf_event_handler_smtp).__init__()
         """Set default variables"""
-        self.smtp_host = ""
+        self.smtp_host = "localhost"
         self.smtp_port = 25
         self.smtp_use_tls = False
         self.smtp_user = ""

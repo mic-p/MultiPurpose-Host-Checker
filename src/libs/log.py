@@ -41,8 +41,10 @@ class Logging(metaclass=Singleton):
                 backupCount=3,
                 encoding='utf-8')
             formatter = logging.Formatter(LOG_FORMAT_DT)
-        logger.addHandler(handler)
+        else:
+            raise ValueError("Log configuration error. We expect 'syslog' or 'file', got: %s" % repr(self._gc.conf_log.logger))
         
+        logger.addHandler(handler)
         handler.setFormatter(formatter)
 
         self._log = logger

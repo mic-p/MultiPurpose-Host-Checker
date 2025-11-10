@@ -37,6 +37,7 @@ class Check_Icmp(BaseCheck):
                             ("icmp_count", (int, 4)), 
                             ("interval", (int, 1)),
                             ("timeout", (int, 2)),
+                            ("os_icmp", (int, 0)), 
                             #("", (str, "")), 
                         )
     def __init__(self,):
@@ -57,7 +58,7 @@ class Check_Icmp(BaseCheck):
         
         self.debug_log("Start ICMP check for: %s"% (host.name, ))
         
-        if HAVE_ICMPLIB:
+        if HAVE_ICMPLIB and not self._host.specific_config.os_icmp == 1:
             return self._do_icmp_pythonic()
         else:
             return self._do_icmp_os()
@@ -65,7 +66,24 @@ class Check_Icmp(BaseCheck):
     
     def _do_icmp_pythonic(self):
         """"""
-        icmplib.ping(self._host)
+        errcode = 0
+        msg = ""
+        
+        try:
+            self.debug_log("Execute internal ICMP command: count=%s, interval=%s, timeout=%s"% 
+                (self._host.specific_config.icmp_count,  self._host.specific_config.interval,  self._host.specific_config.timeout)
+            )
+            icmplib.ping(self._address,
+                count=self._host.specific_config.icmp_count,
+                interval=self._host.specific_config.interval,
+                timeout=self._host.specific_config.timeout
+            )
+        except Exception as err:
+            errcode = 1
+            msg_text = (f"ICMP {err=}, {type(err)=}")
+            msg = "Error on icmplib: %s" % msg_text
+            
+        return (errcode, msg)
         
     def _do_icmp_os(self):
         """"""

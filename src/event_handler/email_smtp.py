@@ -24,7 +24,8 @@ class Evt_EmailSmtp(object):
         
         # initialize connection to our email server
         try:
-            smtp = smtplib.SMTP(smtp_config.smtp_host, port=smtp_config.smtp_port)
+            smtp = smtplib.SMTP()
+            smtp.connect(smtp_config.smtp_host or "localhost", port=smtp_config.smtp_port)
             smtp.ehlo()  # send the extended hello to our server
             
             if  smtp_config.smtp_use_tls:

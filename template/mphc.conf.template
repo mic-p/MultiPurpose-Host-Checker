@@ -1,5 +1,5 @@
-[DEFAULT]
-# default generic configuration section
+[global]
+# default global configuration section
 
 # debug can be 0|1 (no, yes, false, true) | 2
 # 2 is used only by the develop process: not send emails and raise exceptions when errors occurs
