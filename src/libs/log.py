@@ -1,5 +1,9 @@
+# -*- coding: UTF-8 -*-
+
+import pprint
 
 from libs.utils import  Singleton
+import libs.constants as C
 
 import logging
 import logging.handlers
@@ -79,6 +83,9 @@ class Logging(metaclass=Singleton):
         # write to the log. Replacing "\n" with ";" for better readble
         f_log(str(v).replace("\n", ";"))
         
+        if self._gc.debug == C.LOG_DEBUG_DDEBUG:
+            pprint.pprint(v)
+            
         #self._log.handlers[0].flush()
 
     def __call__(self, *args):
