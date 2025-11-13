@@ -7,6 +7,7 @@ import libs.constants as C
 
 import http.client as http_client
 from urllib.parse import urlparse
+import socket
 
 class Check_HttpOk(BaseCheck):
     """"""
@@ -53,7 +54,14 @@ class Check_HttpOk(BaseCheck):
             addr = urlparse(address)
             
             conn = f(addr.netloc)
-            conn.request("GET", addr.path or "/")
+
+            try:
+                conn.request("GET", addr.path or "/")
+            except TimeoutError:
+                return (C.CHECK_ERROR, "HttpOk Error!: Timeout for service: %s" % str(addr))
+            except socket.gaierror:
+                return (C.CHECK_ERROR, "HttpOk Error!: No such name or service: %s" % str(addr))
+            
             reply = conn.getresponse()
             
             # verify response.

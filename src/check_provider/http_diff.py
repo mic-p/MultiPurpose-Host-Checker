@@ -62,6 +62,8 @@ class Check_HttpDiff(BaseCheck):
             conn = f(addr.netloc)
             try:
                 conn.request("GET", addr.path or "/")
+            except TimeoutError:
+                return (C.CHECK_ERROR, "Httpdiff Error!: Timeout for service: %s" % str(addr))
             except socket.gaierror:
                 return (C.CHECK_ERROR, "Httpdiff Error!: No such name or service: %s" % str(addr))
             
