@@ -67,7 +67,7 @@ class Startup(metaclass=Singleton):
         
         # load local configuration
         self._load_local_config()
-        
+                    
         self._gc.startup_done = True
     
     def _load_local_config(self):
@@ -129,6 +129,11 @@ class Startup(metaclass=Singleton):
                     msg = "Error: Host '%s' not present into configuration hosts:\n\n %s" % (h,  "\n ".join([x for x in self._gc.hosts_config]))
                     self._gc.log.error(msg)
                     self._raise_err_exit(msg, 4)
+
+        #check if use want host list and exit
+        if self._startup_args.host_list:
+            self._print_hosts()
+            self._raise_err_exit(exit_code=0)
 
     def _load_event_handlers(self):
         """Load  checks from configuration"""
@@ -309,6 +314,7 @@ class Startup(metaclass=Singleton):
         parser.add_argument("-H", "--hosts", help="File where load hosts", type=str)
         parser.add_argument("-c", "--config", help="Configuration file", type=str)
         parser.add_argument("-n", "--host_check", help="Hostname(s) to check. Split them by ','", type=str)
+        parser.add_argument("-N", "--host_list", help="Hostnames list", action="store_true")
         parser.add_argument("-D", "--debug", help="Force development debug, overwritting the configuration value", type=int,  default=0)
         
         # scan args
@@ -321,7 +327,7 @@ class Startup(metaclass=Singleton):
         f1 = os.path.abspath(args.hosts)
         f2 = os.path.abspath(args.config)
         
-        # check if file exists
+        # check if the files exists
         if not (os.path.exists(f1) and os.path.exists(f2)):
             self._raise_err_parse(parser, "No such file: %s or %s" % (f1, f2))
         
@@ -329,3 +335,10 @@ class Startup(metaclass=Singleton):
         self._gc.host_check_startup = args.host_check.split(",") if args.host_check else []
         
         return args
+    
+    def _print_hosts(self):
+        """Print host list and exit"""
+        print("\nHost list present here:\n")
+        for x in self._gc.hosts_config:
+            print ("- %s" % x)
+        

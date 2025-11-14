@@ -1,17 +1,15 @@
 # -*- coding: UTF-8 -*-
 
-import socket
 import difflib
-import http.client as http_client
-from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 
 from libs.config import GlobalConfig
-from .base_check import BaseCheck
 from libs.objs import O_check_work
-
 import libs.constants as C
+
+from .base_check import BaseCheck
+from ._base_http import do_get_reply
 
 
 class Check_HttpDiff(BaseCheck):
@@ -40,58 +38,35 @@ class Check_HttpDiff(BaseCheck):
         self.check_work.host = host
         self.debug_log("Start Httpdiff check for: %s, %s"% (host.name, address))
     
-        ret_code = C.CHECK_ERROR
-        q_ret = ""
-        
         try:
-            # verify if we need to connect with the S version of http
-            if host.specific_config.use_https:
-                f = http_client.HTTPSConnection
-                prefix = "https://"
-            else:
-                f = http_client.HTTPConnection
-                prefix = "http://"
-
-            # connect
-            if not address.startswith("http"):
-                address = prefix + address
-            
-            # clean address
-            addr = urlparse(address)
-            
-            conn = f(addr.netloc)
-            try:
-                conn.request("GET", addr.path or "/")
-            except TimeoutError:
-                return (C.CHECK_ERROR, "Httpdiff Error!: Timeout for service: %s" % str(addr))
-            except socket.gaierror:
-                return (C.CHECK_ERROR, "Httpdiff Error!: No such name or service: %s" % str(addr))
-            
-            reply = conn.getresponse()
-            
-            # verify response.
-            # TO-DO: implement config array into the configuratio
-            if reply.status == 200:
-                ret_code = C.CHECK_OK
-                q_ret = reply.read()
-                bs = BeautifulSoup(q_ret, "html.parser")
-
-                body = bs.body                
-                
-                q_ret = "\n".join(x for x in body.strings)
-
-            else:
-                # response are different from our need, inspect the status and the reason
-                ret_code = C.CHECK_MSG
-                q_ret = "%s: %s(%s)\nDetails:\n" % (address, reply.status, reply.reason)
-                for item in reply.msg.items():
-                    # retrieve all the server headers
-                    k, v = item
-                    q_ret+= "%s: %s\n" % (k, v)
-            #self.debug_log("Httdiff check. Returns: %s" % (q_ret, ))
-                
+            # connect to the host
+            ret_code, reply = do_get_reply(host, address, "Httpdiff Error!")
         except Exception as err:
             raise err
+        
+        if ret_code != C.CHECK_OK:
+            return (ret_code, reply)
+        
+        # verify response.
+        # TO-DO: implement config array into the configuration
+        if reply.status == 200:
+            ret_code = C.CHECK_OK
+            q_ret = reply.read()
+            
+            bs = BeautifulSoup(q_ret, "html.parser")
+            body = bs.body                
+            q_ret = "\n".join(x for x in body.strings)
+            
+        else:
+            # response are different from our need, inspect the status and the reason
+            ret_code = C.CHECK_MSG
+            q_ret = "%s: %s(%s)\nDetails:\n" % (address, reply.status, reply.reason)
+            for item in reply.msg.items():
+                # retrieve all the server headers
+                k, v = item
+                q_ret+= "%s: %s\n" % (k, v)
+        
+        #self.debug_log("Httdiff check. Returns: %s" % (q_ret, ))
                 
         return (ret_code, q_ret)
 

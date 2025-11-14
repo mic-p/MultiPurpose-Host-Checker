@@ -5,9 +5,7 @@ from .base_check import BaseCheck
 from libs.objs import O_check_work, T_AInt
 import libs.constants as C
 
-import http.client as http_client
-from urllib.parse import urlparse
-import socket
+from ._base_http import do_get_reply
 
 class Check_HttpOk(BaseCheck):
     """"""
@@ -35,53 +33,28 @@ class Check_HttpOk(BaseCheck):
         self.check_work.host = host
         self.debug_log("Start HttpOk check for: %s"% (host.name, ))
     
-        ret_code = C.CHECK_ERROR
-        
         try:
-            # verify if we need to connect with the S version of http
-            if host.specific_config.use_https:
-                f = http_client.HTTPSConnection
-                prefix = "https://"
-            else:
-                f = http_client.HTTPConnection
-                prefix = "http://"
-
-            # connect
-            if not address.startswith("http"):
-                address = prefix + address
-            
-            # clean address
-            addr = urlparse(address)
-            
-            conn = f(addr.netloc)
-
-            try:
-                conn.request("GET", addr.path or "/")
-            except TimeoutError:
-                return (C.CHECK_ERROR, "HttpOk Error!: Timeout for service: %s" % str(addr))
-            except socket.gaierror:
-                return (C.CHECK_ERROR, "HttpOk Error!: No such name or service: %s" % str(addr))
-            
-            reply = conn.getresponse()
-            
-            # verify response.
-            # TO-DO: implement config array into the configuratio
-            
-            if reply.status in host.specific_config.http_status_ok:
-                ret_code = C.CHECK_OK
-                q_ret = "Ok! %s" % reply.status
-            else:
-                # response are different from our need, inspect the status and the reason
-                ret_code = C.CHECK_MSG
-                q_ret = "Error! %s: %s(%s)\nDetails:\n" % (address, reply.status, reply.reason)
-                for item in reply.msg.items():
-                    # retrieve all the server headers
-                    k, v = item
-                    q_ret+= "%s: %s\n" % (k, v)
-            self.debug_log("HttpOk check. Host: %s. Returns: %s" % (address, q_ret, ))
-                
+            # connect to the host
+            ret_code, reply = do_get_reply(host, address, "HttpOk Error!")
         except Exception as err:
             raise err
+        
+        # there is an error, return and signal it
+        if ret_code != C.CHECK_OK:
+            return (ret_code, reply)
+        
+        if reply.status in host.specific_config.http_status_ok:
+            ret_code = C.CHECK_OK
+            q_ret = "Ok! %s" % reply.status
+        else:
+            # response are different from our need, inspect the status and the reason
+            ret_code = C.CHECK_MSG
+            q_ret = "Error! %s: %s(%s)\nDetails:\n" % (address, reply.status, reply.reason)
+            for item in reply.msg.items():
+                # retrieve all the server headers
+                k, v = item
+                q_ret+= "%s: %s\n" % (k, v)
+        self.debug_log("HttpOk check. Host: %s. Returns: %s" % (address, q_ret, ))
                 
         return (ret_code, q_ret)
     
